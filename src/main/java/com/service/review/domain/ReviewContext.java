@@ -20,7 +20,7 @@ public enum ReviewContext {
             
             Retorne apenas JSON com:
             approved (boolean)
-            reason (string) *only if approved is false*
+            reason (string) *apenas se APPROVED = FALSE*
             
             """),
     MESSAGE("""
