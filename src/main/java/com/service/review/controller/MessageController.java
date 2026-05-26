@@ -1,6 +1,7 @@
 package com.service.review.controller;
 
 import com.service.review.domain.Message;
+import com.service.review.dto.ReviewResponse;
 import com.service.review.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ public class MessageController {
     private final MessageService messageService;
 
     @PostMapping("/message")
-    public String reviewMessage(@RequestBody Message message) {
+    public ReviewResponse reviewMessage(@RequestBody Message message) {
         return messageService.reviewMessage(message);
     }
 }

@@ -1,7 +1,10 @@
 package com.service.review.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.*;
+import com.service.review.domain.ReviewContext;
+import com.service.review.dto.ReviewResponse;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +13,7 @@ import java.util.List;
 @Service
 public class ReviewService {
     private final Client client;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ReviewService() {
         Dotenv dotenv = Dotenv.load();
@@ -20,7 +24,7 @@ public class ReviewService {
                 .build();
     }
 
-    public String analyze(String input) {
+    public ReviewResponse analyze(String input, ReviewContext context) {
         String model = "gemini-2.5-flash";
 
         Content content = Content.builder()
@@ -35,28 +39,7 @@ public class ReviewService {
                         .responseMimeType("application/json")
                         .systemInstruction(
                                 Content.fromParts(
-                                        Part.fromText("""
-                                                Você é um filtro de conteúdo proibido. Sua ÚNICA função é detectar conteúdo explicitamente proibido.
-                                                
-                                                REPROVE apenas se houver:
-                                                - palavrões, xingamentos ou ofensas
-                                                - conteúdo sexual ou nudez
-                                                - violência ou drogas
-                                                - contato externo (telefone, WhatsApp, email, Instagram, links)
-                                                - golpes ou conteúdo ilegal
-                                                
-                                                IGNORE completamente:
-                                                - se a marca/modelo na imagem bate com o texto
-                                                - coerência entre título, descrição e imagem
-                                                - qualidade ou veracidade do anúncio
-                                                - qualquer outro critério fora da lista acima
-                                                
-                                                Se não houver nenhum item da lista de reprovação, SEMPRE aprove.
-                                                
-                                                Retorne apenas JSON com:
-                                                approved (boolean)
-                                                reason (string) *only if approved is false*
-                                                """)
+                                        Part.fromText(context.getContext())
                                 )
                         )
                         .build();
@@ -64,6 +47,15 @@ public class ReviewService {
         GenerateContentResponse response =
                 client.models.generateContent(model, List.of(content), config);
 
-        return response.text();
+        try {
+            return objectMapper.readValue(
+                    response.text(),
+                    ReviewResponse.class
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao converter resposta da IA", e);
+        }
     }
+
+
 }
