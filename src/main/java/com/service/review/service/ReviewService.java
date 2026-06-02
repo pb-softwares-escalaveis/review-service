@@ -6,6 +6,7 @@ import com.google.genai.types.*;
 import com.service.review.domain.ReviewContext;
 import com.service.review.dto.ReviewResponse;
 import io.github.cdimascio.dotenv.Dotenv;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +17,33 @@ public class ReviewService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ReviewService() {
-        Dotenv dotenv = Dotenv.load();
-        String apiKey = dotenv.get("GEMINI_API_KEY");
+        String apiKey = System.getenv("GEMINI_API_KEY");
+
+        if (apiKey == null || apiKey.isBlank()) {
+            try {
+                Dotenv dotenv = Dotenv.load();
+                apiKey = dotenv.get("GEMINI_API_KEY");
+            } catch (RuntimeException ignored) {
+                apiKey = null;
+            }
+        }
+
+        if (apiKey == null || apiKey.isBlank()) {
+            this.client = null;
+            return;
+        }
 
         this.client = Client.builder()
                 .apiKey(apiKey)
                 .build();
     }
 
+    @Retry(name = "reviewService", fallbackMethod = "fallback")
     public ReviewResponse analyze(String input, ReviewContext context) {
+        if (client == null) {
+            throw new IllegalStateException("GEMINI_API_KEY nao configurada");
+        }
+
         String model = "gemini-2.5-flash";
 
         Content content = Content.builder()
@@ -57,5 +76,7 @@ public class ReviewService {
         }
     }
 
-
+    public ReviewResponse fallback(Throwable t) {
+        throw new RuntimeException("Falhou após retries", t);
+    }
 }

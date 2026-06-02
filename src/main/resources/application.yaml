@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: review-service
+
+    kafka:
+      bootstrap-servers: localhost:9092
+      producer:
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.StringSerializer
+      consumer:
+        auto-offset-reset: earliest
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.StringSerializer
+
+      resilience4j:
+        retry:
+          instances:
+            reviewService:
+              max-attempts: 3
+              wait-duration: 1m

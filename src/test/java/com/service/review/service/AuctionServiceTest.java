@@ -22,7 +22,6 @@ class AuctionServiceTest {
         String imageKey = "bucket/" + UUID.randomUUID() + ".jpg";
 
         Auction auction = new Auction(
-                1L,
                 "PS5",
                 "Console novo",
                 "Games",
