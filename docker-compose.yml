@@ -33,3 +33,18 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: review
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: review-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: review
+      POSTGRES_USER: review
+      POSTGRES_PASSWORD: review
+    volumes:
+      - review-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  review-postgres-data:

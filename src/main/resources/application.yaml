@@ -1,20 +1,25 @@
 spring:
   application:
-    name: review-service
+    name: review
 
-    kafka:
-      bootstrap-servers: localhost:9092
-      producer:
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: org.springframework.kafka.support.serializer.StringSerializer
-      consumer:
-        auto-offset-reset: earliest
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: org.springframework.kafka.support.serializer.StringSerializer
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-      resilience4j:
-        retry:
-          instances:
-            reviewService:
-              max-attempts: 3
-              wait-duration: 1m
+resilience4j:
+  retry:
+    instances:
+      reviewService:
+        max-attempts: 3
+        wait-duration: 1m
+
+app:
+  kafka-topics:
+    auction-review-approved: "review.auction-created-pending-review"
+    auction-review-rejected: "review.qa-created-pending-review"
