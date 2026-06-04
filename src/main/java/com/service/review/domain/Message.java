@@ -1,47 +1,59 @@
 package com.service.review.domain;
 
+import com.service.review.kafka.events.AuctionCreatedPendingReview;
+import com.service.review.kafka.events.MessageCreatedPendingReview;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "message")
-@AllArgsConstructor
+import java.time.Instant;
+import java.util.UUID;
+
 @NoArgsConstructor
 @Getter
 @Setter
 public class Message {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(length = 200, nullable = false, unique = true, name = "id_usuario")
-    private Long userId;
-
-    @Column(nullable = false)
+    private Long auctionId;
+    private UUID sellerId;
+    private Long messageId;
+    private String sellerName;
+    private String sellerEmail;
     private String message;
-
+    private Instant ocurredAt;
+    private UUID correlationId;
     private ReviewContext reviewContext;
 
-    public Message(Long userId, String message) {
-        this.userId = userId;
+    public Message(Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, Instant ocurredAt, UUID correlationId) {
+        this.auctionId = auctionId;
+        this.sellerId = sellerId;
+        this.messageId = messageId;
+        this.sellerName = sellerName;
+        this.sellerEmail = sellerEmail;
         this.message = message;
+        this.ocurredAt = ocurredAt;
+        this.correlationId = correlationId;
         this.reviewContext = ReviewContext.MESSAGE;
     }
 
-    public Message(Long userId, String message, ReviewContext reviewContext) {
-        this.userId = userId;
-        this.message = message;
-        this.reviewContext = reviewContext != null ? reviewContext : ReviewContext.MESSAGE;
+    public static Message from(MessageCreatedPendingReview event) {
+        return new Message(
+                event.auctionId(),
+                event.sellerId(),
+                event.messageId(),
+                event.sellerName(),
+                event.sellerEmail(),
+                event.message(),
+                event.ocurredAt(),
+                event.correlationId()
+        );
     }
 
     @Override
     public String toString() {
         return "Message{" +
-                "userId=" + userId +
-                ", message='" + message +
+                "message='" + message + '\'' +
                 '}';
     }
 }

@@ -3,9 +3,13 @@ package com.service.review.kafka.events;
 import java.time.Instant;
 import java.util.UUID;
 
-public record QaReviewRejected(
+public record MessageReviewApproved(
         Long auctionId,
-        String reason,
+        UUID sellerId,
+        Long messageId,
+        String sellerName,
+        String sellerEmail,
+        String message,
         Instant ocurredAt,
         UUID correlationId
 ) implements ReviewEvent {

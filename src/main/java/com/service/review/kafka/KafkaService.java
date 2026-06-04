@@ -27,8 +27,8 @@ public class KafkaService {
         String topic = switch (event) {
             case AuctionReviewApproved ignored -> AUCTION_REVIEW_APPROVED;
             case AuctionReviewRejected ignored -> AUCTION_REVIEW_REJECTED;
-            case QaReviewApproved ignored -> QA_REVIEW_APPROVED;
-            case QaReviewRejected ignored -> QA_REVIEW_REJECTED;
+            case MessageReviewApproved ignored -> QA_REVIEW_APPROVED;
+            case MessageReviewRejected ignored -> QA_REVIEW_REJECTED;
 
             default -> throw new IllegalArgumentException("Evento não mapeado para envio: " + event.getClass().getSimpleName());
         };

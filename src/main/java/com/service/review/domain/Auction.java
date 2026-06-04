@@ -1,57 +1,63 @@
 package com.service.review.domain;
 
+import com.service.review.kafka.events.AuctionCreatedPendingReview;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "auction")
-@AllArgsConstructor
+import java.time.Instant;
+import java.util.UUID;
+
 @NoArgsConstructor
 @Getter
 @Setter
 public class Auction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(length = 200, nullable = false, unique = true, name = "id_anuncio")
     private Long auctionId;
-
-    @Column(nullable = false, name = "titulo")
-    private String title;
-
-    @Column(nullable = false, name = "descricao")
-    private String description;
-
-    @Column(nullable = false, name = "imagem")
-    private String image;
-
+    private UUID sellerId;
+    private String sellerName;
+    private String sellerEmail;
+    private String auctionTitle;
+    private String auctionDescription;
+    private Instant ocurredAt;
+    private String auctionThumb;
+    private UUID correlationId;
     private ReviewContext reviewContext;
 
-    public Auction(Long auctionId, String title, String description, String image) {
+    public Auction(Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, Instant ocurredAt, String auctionThumb, UUID correlationId) {
         this.auctionId = auctionId;
-        this.title = title;
-        this.description = description;
-        this.image = image;
+        this.sellerId = sellerId;
+        this.sellerName = sellerName;
+        this.sellerEmail = sellerEmail;
+        this.auctionTitle = auctionTitle;
+        this.auctionDescription = auctionDescription;
+        this.ocurredAt = ocurredAt;
+        this.auctionThumb = auctionThumb;
+        this.correlationId = correlationId;
         this.reviewContext = ReviewContext.AUCTION;
     }
 
-    public Auction(String title, String description, String image, ReviewContext reviewContext) {
-        this.title = title;
-        this.description = description;
-        this.image = image;
-        this.reviewContext = reviewContext != null ? reviewContext : ReviewContext.AUCTION;
+    public static Auction from(AuctionCreatedPendingReview event) {
+        return new Auction(
+                event.auctionId(),
+                event.sellerId(),
+                event.sellerName(),
+                event.sellerEmail(),
+                event.auctionTitle(),
+                event.auctionDescription(),
+                event.ocurredAt(),
+                event.auctionThumb(),
+                event.correlationId()
+        );
     }
 
     @Override
     public String toString() {
         return "Auction{" +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", image='" + image +
+                "auctionTitle='" + auctionTitle + '\'' +
+                ", auctionDescription='" + auctionDescription + '\'' +
+                ", auctionThumb='" + auctionThumb + '\'' +
                 '}';
     }
 }
