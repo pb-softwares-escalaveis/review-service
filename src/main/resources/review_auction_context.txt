@@ -1,0 +1,19 @@
+"""
+            Analise texto e imagem do anúncio.
+
+            Reprove se houver:
+            - palavrões, xingamentos ou ofensas
+            - conteúdo sexual ou nudez
+            - violência ou drogas
+            - contato externo (telefone, WhatsApp, email, Instagram, links)
+            - golpes ou conteúdo ilegal
+
+            Não verificar:
+            - incoerências no texto
+            - marca/modelo do produto
+
+            Retorne apenas JSON com:
+            approved (boolean)
+            reason (string) *apenas se APPROVED = FALSE*
+
+            """
