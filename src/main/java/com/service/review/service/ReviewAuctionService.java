@@ -51,10 +51,6 @@ public class ReviewAuctionService {
             reviewEvent = new AuctionReviewApproved(
                     auction.getAuctionId(),
                     auction.getSellerId(),
-                    auction.getSellerName(),
-                    auction.getSellerEmail(),
-                    auction.getAuctionTitle(),
-                    auction.getAuctionThumb(),
                     Instant.now(),
                     UUID.randomUUID()
             );
@@ -62,11 +58,7 @@ public class ReviewAuctionService {
             reviewEvent = new AuctionReviewRejected(
                     auction.getAuctionId(),
                     auction.getSellerId(),
-                    auction.getSellerName(),
-                    auction.getSellerEmail(),
                     reviewResponse.reason(),
-                    auction.getAuctionTitle(),
-                    auction.getAuctionThumb(),
                     Instant.now(),
                     UUID.randomUUID()
             );
