@@ -6,7 +6,6 @@ import com.service.review.kafka.events.AuctionCreatedPendingReview;
 import com.service.review.kafka.events.MessageCreatedPendingReview;
 import com.service.review.service.ReviewAuctionService;
 import com.service.review.service.ReviewMessageService;
-import com.service.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,7 +18,7 @@ public class KafkaReviewConsumer {
     private final ReviewAuctionService reviewAuctionService;
     private final ReviewMessageService reviewMessageService;
 
-    @KafkaListener(topics = "auction.lot.created-pending")
+    @KafkaListener(topics = "auctions.lot.created-pending")
     public void consumeAuctionPendingReview(AuctionCreatedPendingReview event) {
         Auction auction = Auction.from(event);
         log.info("Auction consumida do Kafka: {}", auction);

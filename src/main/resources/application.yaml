@@ -1,17 +1,37 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: review
 
+  datasource:
+    url: jdbc:postgresql://localhost:5433/review
+    username: review
+    password: review
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   kafka:
     bootstrap-servers: localhost:9092
+    consumer:
+      group-id: review-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.add.type.headers: false
+        spring.json.use.type.headers: false
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    consumer:
-      group-id: auction-service-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
 
 resilience4j:
   retry:
@@ -22,5 +42,10 @@ resilience4j:
 
 app:
   kafka-topics:
-    auction-review-approved: "review.auction-created-pending-review"
-    auction-review-rejected: "review.qa-created-pending-review"
+    review:
+      auction-review-approved: "reviews.auction.approved"
+      auction-review-rejected: "reviews.auction.rejected"
+      auction-created-pending: "auctions.lot.created-pending"
+      qa-created-pending: "qa.created-pending"
+      qa-review-approved: "qa.review.approved"
+      qa-review-rejected: "qa.review.rejected"
