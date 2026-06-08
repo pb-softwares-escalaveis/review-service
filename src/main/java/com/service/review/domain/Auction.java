@@ -23,7 +23,6 @@ public class Auction {
     private Instant ocurredAt;
     private String auctionThumb;
     private UUID correlationId;
-    private ReviewContext reviewContext;
 
     public Auction(Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, Instant ocurredAt, String auctionThumb, UUID correlationId) {
         this.auctionId = auctionId;
@@ -35,7 +34,6 @@ public class Auction {
         this.ocurredAt = ocurredAt;
         this.auctionThumb = auctionThumb;
         this.correlationId = correlationId;
-        this.reviewContext = ReviewContext.AUCTION;
     }
 
     public static Auction from(AuctionCreatedPendingReview event) {

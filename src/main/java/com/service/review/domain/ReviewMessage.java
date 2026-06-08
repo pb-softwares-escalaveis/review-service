@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -39,12 +38,17 @@ public class ReviewMessage {
     @Column(nullable = false)
     private Instant creationDate;
 
-    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String reason) {
+    @ManyToOne
+    @JoinColumn(name = "id_context")
+    ReviewMessageContext reviewMessageContext;
+
+    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String reason, ReviewMessageContext reviewMessageContext) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.messageId = messageId;
         this.reason = reason;
         this.approved = approved;
         this.creationDate = Instant.now();
+        this.reviewMessageContext = reviewMessageContext;
     }
 }

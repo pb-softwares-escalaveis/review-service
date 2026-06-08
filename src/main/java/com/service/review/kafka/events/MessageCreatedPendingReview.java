@@ -1,7 +1,5 @@
 package com.service.review.kafka.events;
 
-import com.service.review.domain.ReviewContext;
-
 import java.time.Instant;
 import java.util.UUID;
 

@@ -2,6 +2,7 @@ package com.service.review.service;
 
 import com.service.review.domain.Message;
 import com.service.review.domain.ReviewMessage;
+import com.service.review.domain.ReviewMessageContext;
 import com.service.review.dto.ReviewResponse;
 import com.service.review.kafka.KafkaService;
 import com.service.review.kafka.events.*;
@@ -19,27 +20,28 @@ public class ReviewMessageService {
     private final ReviewService reviewService;
     private final KafkaService kafkaService;
 
-    public ReviewResponse reviewMessage(Message message) {
-        ReviewResponse reviewResponse = analyzeMessage(message);
-        persistReview(message, reviewResponse);
+    public ReviewResponse reviewMessage(Message message, ReviewMessageContext reviewMessageContext) {
+        ReviewResponse reviewResponse = analyzeMessage(message, reviewMessageContext);
+        persistReview(message, reviewMessageContext, reviewResponse);
         publishEvent(message, reviewResponse);
         return reviewResponse;
     }
 
-    private ReviewResponse analyzeMessage(Message message) {
+    private ReviewResponse analyzeMessage(Message message, ReviewMessageContext reviewMessageContext) {
         return reviewService.analyze(
                 message.toString(),
-                message.getReviewContext()
+                reviewMessageContext.getContext()
         );
     }
 
-    private void persistReview(Message message, ReviewResponse reviewResponse) {
+    private void persistReview(Message message, ReviewMessageContext reviewMessageContext, ReviewResponse reviewResponse) {
         ReviewMessage reviewMessage = new ReviewMessage(
                 message.getAuctionId(),
                 message.getSellerId(),
                 message.getMessageId(),
                 reviewResponse.approved(),
-                reviewResponse.reason()
+                reviewResponse.reason(),
+                reviewMessageContext
         );
         reviewMessageRepository.save(reviewMessage);
     }

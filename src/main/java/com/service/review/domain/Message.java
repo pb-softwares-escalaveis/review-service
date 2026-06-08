@@ -23,7 +23,6 @@ public class Message {
     private String message;
     private Instant ocurredAt;
     private UUID correlationId;
-    private ReviewContext reviewContext;
 
     public Message(Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, Instant ocurredAt, UUID correlationId) {
         this.auctionId = auctionId;
@@ -34,7 +33,6 @@ public class Message {
         this.message = message;
         this.ocurredAt = ocurredAt;
         this.correlationId = correlationId;
-        this.reviewContext = ReviewContext.MESSAGE;
     }
 
     public static Message from(MessageCreatedPendingReview event) {

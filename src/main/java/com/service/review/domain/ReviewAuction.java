@@ -33,11 +33,17 @@ public class ReviewAuction {
     @Column(nullable = false)
     private Instant creationDate;
 
-    public ReviewAuction(Long auctionId, UUID sellerId, Boolean approved, String reason) {
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_context")
+    private ReviewAuctionContext reviewAuctionContext;
+
+    public ReviewAuction(Long auctionId, UUID sellerId, Boolean approved, String reason, ReviewAuctionContext reviewAuctionContext) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.approved = approved;
         this.reason = reason;
+        this.reviewAuctionContext = reviewAuctionContext;
         this.creationDate = Instant.now();
+
     }
 }

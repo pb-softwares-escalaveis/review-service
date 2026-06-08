@@ -2,6 +2,7 @@ package com.service.review.service;
 
 import com.service.review.domain.Auction;
 import com.service.review.domain.ReviewAuction;
+import com.service.review.domain.ReviewAuctionContext;
 import com.service.review.dto.ReviewResponse;
 import com.service.review.kafka.KafkaService;
 import com.service.review.kafka.events.AuctionReviewApproved;
@@ -21,26 +22,27 @@ public class ReviewAuctionService {
     private final ReviewService reviewService;
     private final KafkaService kafkaService;
 
-    public ReviewResponse reviewAuction(Auction auction) {
-        ReviewResponse reviewResponse = analyzeAuction(auction);
-        persistReview(auction, reviewResponse);
+    public ReviewResponse reviewAuction(Auction auction, ReviewAuctionContext reviewAuctionContext) {
+        ReviewResponse reviewResponse = analyzeAuction(auction, reviewAuctionContext);
+        persistReview(auction, reviewResponse,  reviewAuctionContext);
         publishEvent(auction, reviewResponse);
         return reviewResponse;
     }
 
-    private ReviewResponse analyzeAuction(Auction auction) {
+    private ReviewResponse analyzeAuction(Auction auction, ReviewAuctionContext reviewAuctionContext) {
         return reviewService.analyze(
                 auction.toString(),
-                auction.getReviewContext()
+                reviewAuctionContext.getContext()
         );
     }
 
-    private void persistReview(Auction auction, ReviewResponse reviewResponse) {
+    private void persistReview(Auction auction, ReviewResponse reviewResponse, ReviewAuctionContext reviewAuctionContext) {
         ReviewAuction reviewAuction = new ReviewAuction(
                 auction.getAuctionId(),
                 auction.getSellerId(),
                 reviewResponse.approved(),
-                reviewResponse.reason()
+                reviewResponse.reason(),
+                reviewAuctionContext
         );
         reviewAuctionRepository.save(reviewAuction);
     }

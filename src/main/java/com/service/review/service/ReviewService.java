@@ -3,7 +3,6 @@ package com.service.review.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.*;
-import com.service.review.domain.ReviewContext;
 import com.service.review.dto.ReviewResponse;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -39,7 +38,7 @@ public class ReviewService {
     }
 
     @Retry(name = "reviewService", fallbackMethod = "fallback")
-    public ReviewResponse analyze(String input, ReviewContext context) {
+    public ReviewResponse analyze(String input, String context) {
         if (client == null) {
             throw new IllegalStateException("GEMINI_API_KEY nao configurada");
         }
@@ -58,7 +57,7 @@ public class ReviewService {
                         .responseMimeType("application/json")
                         .systemInstruction(
                                 Content.fromParts(
-                                        Part.fromText(context.getContext())
+                                        Part.fromText(context)
                                 )
                         )
                         .build();
