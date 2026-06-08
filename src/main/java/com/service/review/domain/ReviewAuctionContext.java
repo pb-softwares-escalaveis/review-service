@@ -17,6 +17,6 @@ public class ReviewAuctionContext {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "context")
+    @Column(nullable = false, name = "context", columnDefinition = "TEXT")
     private String context;
 }

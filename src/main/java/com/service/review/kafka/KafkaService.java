@@ -1,12 +1,13 @@
 package com.service.review.kafka;
 
-
 import com.service.review.kafka.events.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
@@ -29,9 +30,26 @@ public class KafkaService {
             case AuctionReviewRejected ignored -> AUCTION_REVIEW_REJECTED;
             case MessageReviewApproved ignored -> QA_REVIEW_APPROVED;
             case MessageReviewRejected ignored -> QA_REVIEW_REJECTED;
-
-            default -> throw new IllegalArgumentException("Evento não mapeado para envio: " + event.getClass().getSimpleName());
+            default -> throw new IllegalArgumentException(
+                    "Evento não mapeado para envio: " + event.getClass().getSimpleName());
         };
-        kafkaTemplate.send(topic, kafkaKey, event);
+
+        log.debug("Publicando evento no Kafka. tipo={} | topic={} | key={}",
+                event.getClass().getSimpleName(), topic, kafkaKey);
+
+        kafkaTemplate.send(topic, kafkaKey, event)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Falha ao publicar evento no Kafka. tipo={} | topic={} | key={} | erro={}",
+                                event.getClass().getSimpleName(), topic, kafkaKey, ex.getMessage(), ex);
+                    } else {
+                        log.info("Evento publicado com sucesso no Kafka. tipo={} | topic={} | key={} | partition={} | offset={}",
+                                event.getClass().getSimpleName(),
+                                topic,
+                                kafkaKey,
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset());
+                    }
+                });
     }
 }

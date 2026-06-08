@@ -24,7 +24,7 @@ class KafkaReviewConsumerIntegrationTest {
                 "Cadeira de 5 pes",
                 "Cadeira totalmente funcional",
                 Instant.now(),
-                "/teste",
+                "bucket.oleiloeiroonline.top/auction-images/air_fryer_philips_walita.jpg",
                 UUID.randomUUID()
         );
 
