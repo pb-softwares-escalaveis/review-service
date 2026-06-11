@@ -33,7 +33,7 @@ public class ReviewMessageService {
 
         log.info("Revisão da mensagem concluída. auctionId={} | messageId={} | approved={} | reason='{}'",
                 message.getAuctionId(), message.getMessageId(),
-                reviewResponse.approved(), reviewResponse.reason());
+                reviewResponse.approved(), reviewResponse.repprovedReason());
 
         return reviewResponse;
     }
@@ -48,7 +48,7 @@ public class ReviewMessageService {
         );
 
         log.debug("Análise de IA recebida para mensagem. messageId={} | approved={} | reason='{}'",
-                message.getMessageId(), response.approved(), response.reason());
+                message.getMessageId(), response.approved(), response.repprovedReason());
 
         return response;
     }
@@ -57,14 +57,30 @@ public class ReviewMessageService {
         log.debug("Persistindo revisão da mensagem. messageId={} | auctionId={} | approved={}",
                 message.getMessageId(), message.getAuctionId(), reviewResponse.approved());
 
-        ReviewMessage reviewMessage = new ReviewMessage(
-                message.getAuctionId(),
-                message.getSellerId(),
-                message.getMessageId(),
-                reviewResponse.approved(),
-                reviewResponse.reason(),
-                reviewMessageContext
-        );
+        ReviewMessage reviewMessage;
+        boolean isReport = reviewMessageContext.getType() == ContextType.REPORTED;
+
+        if (isReport) {
+            reviewMessage = new ReviewMessage(
+                    message.getAuctionId(),
+                    message.getSellerId(),
+                    message.getMessageId(),
+                    reviewResponse.approved(),
+                    reviewResponse.repprovedReason(),
+                    message.getReportReason(),
+                    reviewMessageContext.getType(),
+                    reviewMessageContext
+            );
+        } else {
+            reviewMessage = new ReviewMessage(
+                    message.getAuctionId(),
+                    message.getSellerId(),
+                    message.getMessageId(),
+                    reviewResponse.approved(),
+                    reviewResponse.repprovedReason(),
+                    reviewMessageContext
+            );
+        }
 
         ReviewMessage saved = reviewMessageRepository.save(reviewMessage);
         log.info("Revisão da mensagem persistida com sucesso. reviewId={} | messageId={} | auctionId={} | approved={}",
@@ -100,12 +116,12 @@ public class ReviewMessageService {
         } else {
             log.info("Mensagem REPROVADA — publicando evento MessageReviewRejected. messageId={} | auctionId={} | sellerId={} | reason='{}'",
                     message.getMessageId(), message.getAuctionId(),
-                    message.getSellerId(), reviewResponse.reason());
+                    message.getSellerId(), reviewResponse.repprovedReason());
             reviewEvent = new MessageReviewRejected(
                     message.getAuctionId(),
                     message.getSellerId(),
                     message.getMessageId(),
-                    reviewResponse.reason(),
+                    reviewResponse.repprovedReason(),
                     Instant.now(),
                     UUID.randomUUID()
             );

@@ -1,5 +1,6 @@
 package com.service.review.domain;
 
+import com.service.review.enums.ContextType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,7 +34,14 @@ public class ReviewMessage {
     private Boolean approved;
 
     @Column(name = "reason")
-    private String reason;
+    private String repprovedReason;
+
+    @Column(name = "reportReason")
+    private String reportReason;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, name = "type")
+    private ContextType type;
 
     @Column(nullable = false)
     private Instant creationDate;
@@ -42,12 +50,24 @@ public class ReviewMessage {
     @JoinColumn(name = "id_context")
     ReviewMessageContext reviewMessageContext;
 
-    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String reason, ReviewMessageContext reviewMessageContext) {
+    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String repprovedReason, ReviewMessageContext reviewMessageContext) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.messageId = messageId;
-        this.reason = reason;
+        this.repprovedReason = repprovedReason;
         this.approved = approved;
+        this.creationDate = Instant.now();
+        this.reviewMessageContext = reviewMessageContext;
+    }
+
+    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String repprovedReason, String reportReason, ContextType type, ReviewMessageContext reviewMessageContext) {
+        this.auctionId = auctionId;
+        this.sellerId = sellerId;
+        this.messageId = messageId;
+        this.approved = approved;
+        this.repprovedReason = repprovedReason;
+        this.reportReason = reportReason;
+        this.type = type;
         this.creationDate = Instant.now();
         this.reviewMessageContext = reviewMessageContext;
     }

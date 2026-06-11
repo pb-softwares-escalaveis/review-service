@@ -39,7 +39,7 @@ public class ReviewAuctionService {
         publishEvent(auction, reviewResponse, reviewAuctionContext);
 
         log.info("Revisão do leilão concluída. auctionId={} | approved={} | reason='{}'",
-                auction.getAuctionId(), reviewResponse.approved(), reviewResponse.reason());
+                auction.getAuctionId(), reviewResponse.approved(), reviewResponse.repprovedReason());
 
         return reviewResponse;
     }
@@ -78,7 +78,7 @@ public class ReviewAuctionService {
         );
 
         log.debug("Análise de IA recebida para leilão. auctionId={} | approved={} | reason='{}'",
-                auction.getAuctionId(), response.approved(), response.reason());
+                auction.getAuctionId(), response.approved(), response.repprovedReason());
 
         return response;
     }
@@ -87,13 +87,27 @@ public class ReviewAuctionService {
         log.debug("Persistindo revisão do leilão. auctionId={} | approved={}",
                 auction.getAuctionId(), reviewResponse.approved());
 
-        ReviewAuction reviewAuction = new ReviewAuction(
-                auction.getAuctionId(),
-                auction.getSellerId(),
-                reviewResponse.approved(),
-                reviewResponse.reason(),
-                reviewAuctionContext
-        );
+        boolean isReport = reviewAuctionContext.getType() == ContextType.REPORTED;
+        ReviewAuction reviewAuction;
+
+        if (isReport) {
+            reviewAuction = new ReviewAuction(
+                    auction.getAuctionId(),
+                    auction.getSellerId(),
+                    reviewResponse.approved(),
+                    reviewResponse.repprovedReason(),
+                    auction.getReportReason(),
+                    reviewAuctionContext.getType(),
+                    reviewAuctionContext);
+        } else {
+            reviewAuction = new ReviewAuction(
+                    auction.getAuctionId(),
+                    auction.getSellerId(),
+                    reviewResponse.approved(),
+                    reviewResponse.repprovedReason(),
+                    reviewAuctionContext.getType(),
+                    reviewAuctionContext);
+        }
 
         ReviewAuction saved = reviewAuctionRepository.save(reviewAuction);
         log.info("Revisão do leilão persistida com sucesso. reviewId={} | auctionId={} | approved={}",
@@ -126,11 +140,11 @@ public class ReviewAuctionService {
             }
         } else {
             log.info("Leilão REPROVADO — publicando evento AuctionReviewRejected. auctionId={} | sellerId={} | reason='{}'",
-                    auction.getAuctionId(), auction.getSellerId(), reviewResponse.reason());
+                    auction.getAuctionId(), auction.getSellerId(), reviewResponse.repprovedReason());
             reviewEvent = new AuctionReviewRejected(
                     auction.getAuctionId(),
                     auction.getSellerId(),
-                    reviewResponse.reason(),
+                    reviewResponse.repprovedReason(),
                     Instant.now(),
                     UUID.randomUUID()
             );

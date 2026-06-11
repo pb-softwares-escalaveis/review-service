@@ -98,7 +98,7 @@ public class GeminiReviewService implements ReviewService {
         try {
             ReviewResponse reviewResponse = objectMapper.readValue(response.text(), ReviewResponse.class);
             log.info("Análise concluída. Resultado: approved={} | reason='{}'",
-                    reviewResponse.approved(), reviewResponse.reason());
+                    reviewResponse.approved(), reviewResponse.repprovedReason());
             return reviewResponse;
         } catch (Exception e) {
             log.error("Falha ao desserializar resposta do Gemini. Resposta recebida: '{}'. Erro: {}",
