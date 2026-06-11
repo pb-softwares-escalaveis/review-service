@@ -3,14 +3,13 @@ package com.service.review.controller;
 import com.service.review.domain.ReviewAuction;
 import com.service.review.domain.ReviewAuctionContext;
 import com.service.review.dto.ReviewAuctionRequest;
+import com.service.review.exception.ResourceNotFoundException;
 import com.service.review.repository.ReviewAuctionContextRepository;
 import com.service.review.repository.ReviewAuctionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,8 +36,7 @@ public class ReviewAuctionController {
         ReviewAuction reviewAuction = reviewAuctionRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("ReviewAuction nao encontrada. id={}", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "ReviewAuction not found with id: " + id);
+                    return new ResourceNotFoundException("ReviewAuction not found with id: " + id);
                 });
         log.debug("ReviewAuction encontrada. id={} | auctionId={} | approved={}",
                 id, reviewAuction.getAuctionId(), reviewAuction.getApproved());

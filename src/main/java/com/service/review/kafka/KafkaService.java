@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
-    @Value("${app.kafka-topics.report-auction-review-approved")
+    @Value("${app.kafka-topics.review.report-auction-review-approved}")
     String AUCTION_REPORT_APPROVED;
-    @Value("${app.kafka-topics.report-message-review-approved")
+    @Value("${app.kafka-topics.review.report-message-review-approved}")
     String MESSAGE_REPORT_APPROVED;
     @Value("${app.kafka-topics.review.auction-review-approved}")
     String AUCTION_REVIEW_APPROVED;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.*;
 import com.service.review.dto.ReviewResponse;
+import com.service.review.exception.ReviewProviderException;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,7 @@ public class GeminiReviewService implements ReviewService {
 
         if (client == null) {
             log.error("Tentativa de análise sem cliente Gemini configurado. GEMINI_API_KEY pode estar ausente.");
-            throw new IllegalStateException("GEMINI_API_KEY nao configurada");
+            throw new ReviewProviderException("GEMINI_API_KEY nao configurada");
         }
 
         List<Part> parts = new ArrayList<>();
@@ -103,12 +104,12 @@ public class GeminiReviewService implements ReviewService {
         } catch (Exception e) {
             log.error("Falha ao desserializar resposta do Gemini. Resposta recebida: '{}'. Erro: {}",
                     response.text(), e.getMessage(), e);
-            throw new RuntimeException("Erro ao converter resposta da IA", e);
+            throw new ReviewProviderException("Erro ao converter resposta da IA", e);
         }
     }
 
     public ReviewResponse fallback(Throwable t) {
         log.error("Todos os retries esgotados no ReviewService. Causa raiz: {}", t.getMessage(), t);
-        throw new RuntimeException("Falhou após retries", t);
+        throw new ReviewProviderException("Falhou após retries", t);
     }
 }

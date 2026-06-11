@@ -3,13 +3,13 @@ package com.service.review.controller;
 import com.service.review.domain.ReviewMessageContext;
 import com.service.review.dto.ReviewMessageContextRequest;
 import com.service.review.enums.ContextType;
+import com.service.review.exception.ResourceNotFoundException;
 import com.service.review.repository.ReviewMessageContextRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,8 +34,7 @@ public class ReviewMessageContextController {
         ReviewMessageContext context = reviewMessageContextRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("ReviewMessageContext nao encontrado. id={}", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "ReviewMessageContext not found with id: " + id);
+                    return new ResourceNotFoundException("ReviewMessageContext not found with id: " + id);
                 });
         log.debug("ReviewMessageContext encontrado. id={}", id);
         return ResponseEntity.ok(context);
@@ -47,8 +46,7 @@ public class ReviewMessageContextController {
         ReviewMessageContext context = reviewMessageContextRepository.findTopByTypeOrderByIdDesc(type);
         if (context == null) {
             log.warn("Nenhum ReviewMessageContext encontrado para type={}", type);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "No ReviewMessageContext found for type: " + type);
+            throw new ResourceNotFoundException("No ReviewMessageContext found for type: " + type);
         }
         log.debug("Contexto mais recente encontrado. id={} | type={}", context.getId(), type);
         return ResponseEntity.ok(context);
@@ -76,8 +74,7 @@ public class ReviewMessageContextController {
         ReviewMessageContext context = reviewMessageContextRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("ReviewMessageContext nao encontrado para atualizacao. id={}", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "ReviewMessageContext not found with id: " + id);
+                    return new ResourceNotFoundException("ReviewMessageContext not found with id: " + id);
                 });
 
         context.setContext(request.context());
@@ -94,8 +91,7 @@ public class ReviewMessageContextController {
 
         if (!reviewMessageContextRepository.existsById(id)) {
             log.warn("ReviewMessageContext nao encontrado para exclusao. id={}", id);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "ReviewMessageContext not found with id: " + id);
+            throw new ResourceNotFoundException("ReviewMessageContext not found with id: " + id);
         }
 
         reviewMessageContextRepository.deleteById(id);

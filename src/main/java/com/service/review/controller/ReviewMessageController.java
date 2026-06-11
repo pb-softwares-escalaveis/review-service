@@ -1,14 +1,13 @@
 package com.service.review.controller;
 
 import com.service.review.domain.ReviewMessage;
+import com.service.review.exception.ResourceNotFoundException;
 import com.service.review.repository.ReviewMessageContextRepository;
 import com.service.review.repository.ReviewMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,8 +34,7 @@ public class ReviewMessageController {
         ReviewMessage reviewMessage = reviewMessageRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("ReviewMessage nao encontrada. id={}", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "ReviewMessage not found with id: " + id);
+                    return new ResourceNotFoundException("ReviewMessage not found with id: " + id);
                 });
         log.debug("ReviewMessage encontrada. id={} | messageId={} | auctionId={} | approved={}",
                 id, reviewMessage.getMessageId(), reviewMessage.getAuctionId(), reviewMessage.getApproved());

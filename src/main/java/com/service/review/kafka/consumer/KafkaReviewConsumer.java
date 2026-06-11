@@ -5,6 +5,7 @@ import com.service.review.domain.Message;
 import com.service.review.domain.ReviewAuctionContext;
 import com.service.review.domain.ReviewMessageContext;
 import com.service.review.enums.ContextType;
+import com.service.review.exception.ReviewContextNotFoundException;
 import com.service.review.kafka.events.AuctionCreatedPendingReview;
 import com.service.review.kafka.events.AuctionReportedPendingReview;
 import com.service.review.kafka.events.MessageCreatedPendingReview;
@@ -40,7 +41,7 @@ public class KafkaReviewConsumer {
         if (reviewAuctionContext == null) {
             log.error("Processamento abortado — nenhum ReviewAuctionContext disponível. " +
                     "Cadastre um contexto antes de processar revisões. auctionId={}", auction.getAuctionId());
-            return;
+            throw new ReviewContextNotFoundException("ReviewAuctionContext", ContextType.CREATED);
         }
 
         log.debug("Contexto de revisão carregado. contextId={} | auctionId={}",
@@ -71,7 +72,7 @@ public class KafkaReviewConsumer {
             log.error("Processamento abortado — nenhum ReviewMessageContext disponível. " +
                             "Cadastre um contexto antes de processar revisões. messageId={} | auctionId={}",
                     message.getMessageId(), message.getAuctionId());
-            return;
+            throw new ReviewContextNotFoundException("ReviewMessageContext", ContextType.CREATED);
         }
 
         log.debug("Contexto de revisão carregado. contextId={} | messageId={}",
@@ -101,7 +102,7 @@ public class KafkaReviewConsumer {
         if (reviewAuctionContext == null) {
             log.error("Processamento abortado — nenhum ReviewAuctionContext disponível para type=REPORTED. " +
                     "Cadastre um contexto antes de processar revisões. auctionId={}", auction.getAuctionId());
-            return;
+            throw new ReviewContextNotFoundException("ReviewAuctionContext", ContextType.REPORTED);
         }
 
         log.debug("Contexto de revisão carregado. contextId={} | auctionId={}",
@@ -132,7 +133,7 @@ public class KafkaReviewConsumer {
             log.error("Processamento abortado — nenhum ReviewMessageContext disponível para type=REPORTED. " +
                             "Cadastre um contexto antes de processar revisões. messageId={} | auctionId={}",
                     message.getMessageId(), message.getAuctionId());
-            return;
+            throw new ReviewContextNotFoundException("ReviewMessageContext", ContextType.REPORTED);
         }
 
         log.debug("Contexto de revisão carregado. contextId={} | messageId={}",
