@@ -3,7 +3,7 @@ package com.service.review.kafka.events;
 import java.time.Instant;
 import java.util.UUID;
 
-public record AuctionReviewApproved(
+public record AuctionReportApproved(
         Long auctionId,
         UUID sellerId,
         Instant ocurredAt,

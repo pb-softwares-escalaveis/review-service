@@ -1,5 +1,6 @@
 package com.service.review.domain;
 
+import com.service.review.enums.ContextType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,4 +20,8 @@ public class ReviewAuctionContext {
 
     @Column(nullable = false, name = "context", columnDefinition = "TEXT")
     private String context;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, name = "type")
+    private ContextType type;
 }

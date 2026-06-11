@@ -2,6 +2,7 @@ package com.service.review.controller;
 
 import com.service.review.domain.ReviewAuctionContext;
 import com.service.review.dto.ReviewAuctionContextRequest;
+import com.service.review.enums.ContextType;
 import com.service.review.repository.ReviewAuctionContextRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,34 +42,36 @@ public class ReviewAuctionContextController {
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<ReviewAuctionContext> getLatest() {
-        log.debug("GET /api/v1/review-auction-contexts/latest — buscando contexto mais recente");
-        ReviewAuctionContext context = reviewAuctionContextRepository.findTopByOrderByIdDesc();
+    public ResponseEntity<ReviewAuctionContext> getLatest(@RequestParam ContextType type) {
+        log.debug("GET /api/v1/review-auction-contexts/latest — buscando contexto mais recente. type={}", type);
+        ReviewAuctionContext context = reviewAuctionContextRepository.findTopByTypeOrderByIdDesc(type);
         if (context == null) {
-            log.warn("Nenhum ReviewAuctionContext encontrado no banco de dados.");
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No ReviewAuctionContext found.");
+            log.warn("Nenhum ReviewAuctionContext encontrado para type={}", type);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No ReviewAuctionContext found for type: " + type);
         }
-        log.debug("Contexto mais recente encontrado. id={}", context.getId());
+        log.debug("Contexto mais recente encontrado. id={} | type={}", context.getId(), type);
         return ResponseEntity.ok(context);
     }
 
     @PostMapping
     public ResponseEntity<ReviewAuctionContext> create(@RequestBody ReviewAuctionContextRequest request) {
-        log.info("POST /api/v1/review-auction-contexts — criando novo contexto. tamanho={} caracteres",
-                request.context().length());
+        log.info("POST /api/v1/review-auction-contexts — criando novo contexto. type={} | tamanho={} caracteres",
+                request.type(), request.context().length());
 
         ReviewAuctionContext context = new ReviewAuctionContext();
         context.setContext(request.context());
+        context.setType(request.type());
         ReviewAuctionContext saved = reviewAuctionContextRepository.save(context);
 
-        log.info("ReviewAuctionContext criado com sucesso. id={}", saved.getId());
+        log.info("ReviewAuctionContext criado com sucesso. id={} | type={}", saved.getId(), saved.getType());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ReviewAuctionContext> update(@PathVariable Long id,
                                                        @RequestBody ReviewAuctionContextRequest request) {
-        log.info("PUT /api/v1/review-auction-contexts/{} — atualizando contexto", id);
+        log.info("PUT /api/v1/review-auction-contexts/{} — atualizando contexto. type={}", id, request.type());
 
         ReviewAuctionContext context = reviewAuctionContextRepository.findById(id)
                 .orElseThrow(() -> {
@@ -78,29 +81,10 @@ public class ReviewAuctionContextController {
                 });
 
         context.setContext(request.context());
+        context.setType(request.type());
         ReviewAuctionContext saved = reviewAuctionContextRepository.save(context);
 
-        log.info("ReviewAuctionContext atualizado com sucesso. id={}", saved.getId());
-        return ResponseEntity.ok(saved);
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<ReviewAuctionContext> patch(@PathVariable Long id,
-                                                      @RequestParam String context) {
-        log.info("PATCH /api/v1/review-auction-contexts/{} — atualizando texto do contexto. tamanho={} caracteres",
-                id, context.length());
-
-        ReviewAuctionContext existing = reviewAuctionContextRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("ReviewAuctionContext nao encontrado para patch. id={}", id);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "ReviewAuctionContext not found with id: " + id);
-                });
-
-        existing.setContext(context);
-        ReviewAuctionContext saved = reviewAuctionContextRepository.save(existing);
-
-        log.info("Texto do contexto atualizado com sucesso. id={}", saved.getId());
+        log.info("ReviewAuctionContext atualizado com sucesso. id={} | type={}", saved.getId(), saved.getType());
         return ResponseEntity.ok(saved);
     }
 

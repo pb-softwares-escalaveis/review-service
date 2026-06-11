@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: review
+  profiles:
+    active: dev
 
   datasource:
     url: jdbc:postgresql://localhost:5433/review
@@ -48,9 +50,9 @@ resilience4j:
 app:
   kafka-topics:
     review:
-      auction-review-approved: "reviews.auction.approved"
-      auction-review-rejected: "reviews.auction.rejected"
-      auction-created-pending: "auctions.lot.created-pending"
-      qa-created-pending: "qa.created-pending"
-      qa-review-approved: "qa.review.approved"
-      qa-review-rejected: "qa.review.rejected"
+      report-auction-review-approved: "review.report.auction.approved"
+      report-message-review-approved: "review.report.auction.approved"
+      auction-review-approved: "review.auction.approved"
+      auction-review-rejected: "review.auction.rejected"
+      qa-review-approved: "review.qa.approved"
+      qa-review-rejected: "review.qa.rejected"

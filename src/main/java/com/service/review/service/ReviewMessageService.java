@@ -4,13 +4,12 @@ import com.service.review.domain.Message;
 import com.service.review.domain.ReviewMessage;
 import com.service.review.domain.ReviewMessageContext;
 import com.service.review.dto.ReviewResponse;
+import com.service.review.enums.ContextType;
 import com.service.review.kafka.KafkaService;
 import com.service.review.kafka.events.*;
 import com.service.review.repository.ReviewMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -30,7 +29,7 @@ public class ReviewMessageService {
 
         ReviewResponse reviewResponse = analyzeMessage(message, reviewMessageContext);
         persistReview(message, reviewMessageContext, reviewResponse);
-        publishEvent(message, reviewResponse);
+        publishEvent(message, reviewResponse, reviewMessageContext);
 
         log.info("Revisão da mensagem concluída. auctionId={} | messageId={} | approved={} | reason='{}'",
                 message.getAuctionId(), message.getMessageId(),
@@ -72,22 +71,32 @@ public class ReviewMessageService {
                 saved.getId(), message.getMessageId(), message.getAuctionId(), reviewResponse.approved());
     }
 
-    private void publishEvent(Message message, ReviewResponse reviewResponse) {
+    private void publishEvent(Message message, ReviewResponse reviewResponse, ReviewMessageContext reviewMessageContext) {
         ReviewEvent reviewEvent;
+        boolean isReport = reviewMessageContext.getType() == ContextType.REPORTED;
 
         if (reviewResponse.approved()) {
-            log.info("Mensagem APROVADA — publicando evento MessageReviewApproved. messageId={} | auctionId={} | sellerId={}",
-                    message.getMessageId(), message.getAuctionId(), message.getSellerId());
-            reviewEvent = new MessageReviewApproved(
-                    message.getAuctionId(),
-                    message.getSellerId(),
-                    message.getMessageId(),
-                    message.getSellerName(),
-                    message.getSellerEmail(),
-                    message.getMessage(),
-                    Instant.now(),
-                    UUID.randomUUID()
-            );
+            if (isReport) {
+                log.info("Report de mensagem APROVADO — publicando evento MessageReportApproved. messageId={} | auctionId={} | sellerId={}",
+                        message.getMessageId(), message.getAuctionId(), message.getSellerId());
+                reviewEvent = new MessageReportApproved(
+                        message.getAuctionId(),
+                        message.getSellerId(),
+                        message.getMessageId(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            } else {
+                log.info("Mensagem APROVADA — publicando evento MessageReviewApproved. messageId={} | auctionId={} | sellerId={}",
+                        message.getMessageId(), message.getAuctionId(), message.getSellerId());
+                reviewEvent = new MessageReviewApproved(
+                        message.getAuctionId(),
+                        message.getSellerId(),
+                        message.getMessageId(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            }
         } else {
             log.info("Mensagem REPROVADA — publicando evento MessageReviewRejected. messageId={} | auctionId={} | sellerId={} | reason='{}'",
                     message.getMessageId(), message.getAuctionId(),
@@ -96,8 +105,6 @@ public class ReviewMessageService {
                     message.getAuctionId(),
                     message.getSellerId(),
                     message.getMessageId(),
-                    message.getSellerName(),
-                    message.getSellerEmail(),
                     reviewResponse.reason(),
                     Instant.now(),
                     UUID.randomUUID()

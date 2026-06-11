@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
+    @Value("${app.kafka-topics.report-auction-review-approved")
+    String AUCTION_REPORT_APPROVED;
+    @Value("${app.kafka-topics.report-message-review-approved")
+    String MESSAGE_REPORT_APPROVED;
     @Value("${app.kafka-topics.review.auction-review-approved}")
     String AUCTION_REVIEW_APPROVED;
     @Value("${app.kafka-topics.review.auction-review-rejected}")
@@ -30,6 +34,8 @@ public class KafkaService {
             case AuctionReviewRejected ignored -> AUCTION_REVIEW_REJECTED;
             case MessageReviewApproved ignored -> QA_REVIEW_APPROVED;
             case MessageReviewRejected ignored -> QA_REVIEW_REJECTED;
+            case AuctionReportApproved ignored -> AUCTION_REPORT_APPROVED;
+            case MessageReportApproved ignored -> MESSAGE_REPORT_APPROVED;
             default -> throw new IllegalArgumentException(
                     "Evento não mapeado para envio: " + event.getClass().getSimpleName());
         };

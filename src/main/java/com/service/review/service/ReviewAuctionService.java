@@ -4,15 +4,15 @@ import com.service.review.domain.Auction;
 import com.service.review.domain.ReviewAuction;
 import com.service.review.domain.ReviewAuctionContext;
 import com.service.review.dto.ReviewResponse;
+import com.service.review.enums.ContextType;
 import com.service.review.kafka.KafkaService;
+import com.service.review.kafka.events.AuctionReportApproved;
 import com.service.review.kafka.events.AuctionReviewApproved;
 import com.service.review.kafka.events.AuctionReviewRejected;
 import com.service.review.kafka.events.ReviewEvent;
 import com.service.review.repository.ReviewAuctionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -36,7 +36,7 @@ public class ReviewAuctionService {
 
         ReviewResponse reviewResponse = analyzeAuction(auction, reviewAuctionContext);
         persistReview(auction, reviewResponse, reviewAuctionContext);
-        publishEvent(auction, reviewResponse);
+        publishEvent(auction, reviewResponse, reviewAuctionContext);
 
         log.info("Revisão do leilão concluída. auctionId={} | approved={} | reason='{}'",
                 auction.getAuctionId(), reviewResponse.approved(), reviewResponse.reason());
@@ -48,16 +48,11 @@ public class ReviewAuctionService {
         log.debug("Enviando leilão para análise de IA. auctionId={} | contextId={}",
                 auction.getAuctionId(), reviewAuctionContext.getId());
 
-        String thumbStr = auction.getAuctionThumb();
-        if (!thumbStr.startsWith("http://") && !thumbStr.startsWith("https://")) {
-            thumbStr = "https://" + thumbStr;
-        }
         byte[] imageBytes = null;
         String mimeType = null;
 
-        if (thumbStr.isBlank()) {
+        if (!auction.getAuctionThumb().isBlank()) {
             try {
-
                 URL url = new URI(auction.getAuctionThumb()).toURL();
                 URLConnection connection = url.openConnection();
                 mimeType = connection.getContentType();
@@ -105,18 +100,30 @@ public class ReviewAuctionService {
                 saved.getId(), auction.getAuctionId(), reviewResponse.approved());
     }
 
-    private void publishEvent(Auction auction, ReviewResponse reviewResponse) {
+    private void publishEvent(Auction auction, ReviewResponse reviewResponse, ReviewAuctionContext reviewAuctionContext) {
         ReviewEvent reviewEvent;
+        boolean isReport = reviewAuctionContext.getType() == ContextType.REPORTED;
 
         if (reviewResponse.approved()) {
-            log.info("Leilão APROVADO — publicando evento AuctionReviewApproved. auctionId={} | sellerId={}",
-                    auction.getAuctionId(), auction.getSellerId());
-            reviewEvent = new AuctionReviewApproved(
-                    auction.getAuctionId(),
-                    auction.getSellerId(),
-                    Instant.now(),
-                    UUID.randomUUID()
-            );
+            if (isReport) {
+                log.info("Report de leilão APROVADO — publicando evento AuctionReportApproved. auctionId={} | sellerId={}",
+                        auction.getAuctionId(), auction.getSellerId());
+                reviewEvent = new AuctionReportApproved(
+                        auction.getAuctionId(),
+                        auction.getSellerId(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            } else {
+                log.info("Leilão APROVADO — publicando evento AuctionReviewApproved. auctionId={} | sellerId={}",
+                        auction.getAuctionId(), auction.getSellerId());
+                reviewEvent = new AuctionReviewApproved(
+                        auction.getAuctionId(),
+                        auction.getSellerId(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            }
         } else {
             log.info("Leilão REPROVADO — publicando evento AuctionReviewRejected. auctionId={} | sellerId={} | reason='{}'",
                     auction.getAuctionId(), auction.getSellerId(), reviewResponse.reason());

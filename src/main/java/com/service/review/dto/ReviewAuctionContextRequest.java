@@ -1,3 +1,9 @@
 package com.service.review.dto;
 
-public record ReviewAuctionContextRequest(String context) {}
+import com.service.review.enums.ContextType;
+
+public record ReviewAuctionContextRequest(
+        String context,
+        ContextType type
+) {
+}
