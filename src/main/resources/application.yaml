@@ -43,9 +43,26 @@ spring:
 resilience4j:
   retry:
     instances:
-      reviewService:
+      geminiReviewService:
         max-attempts: 3
-        wait-duration: 1m
+        wait-duration: 2s
+        retry-exceptions:
+          - com.service.review.exception.ReviewProviderException
+          - java.io.IOException
+          - java.net.SocketTimeoutException
+  circuitbreaker:
+    instances:
+      geminiReviewService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 2
+        record-exceptions:
+          - com.service.review.exception.ReviewProviderException
+          - java.io.IOException
+          - java.net.SocketTimeoutException
 
 app:
   kafka-topics:

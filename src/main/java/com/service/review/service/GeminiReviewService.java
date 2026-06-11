@@ -6,6 +6,7 @@ import com.google.genai.types.*;
 import com.service.review.dto.ReviewResponse;
 import com.service.review.exception.ReviewProviderException;
 import io.github.cdimascio.dotenv.Dotenv;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -53,12 +54,14 @@ public class GeminiReviewService implements ReviewService {
         log.info("Cliente Gemini inicializado com sucesso. Modelo padrão: {}", MODEL);
     }
 
-    @Retry(name = "reviewService", fallbackMethod = "fallback")
+    @Retry(name = "geminiReviewService")
+    @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback")
     public ReviewResponse analyze(String input, String context) {
         return analyze(input, context, null, null);
     }
 
-    @Retry(name = "reviewService", fallbackMethod = "fallback")
+    @Retry(name = "geminiReviewService")
+    @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback")
     public ReviewResponse analyze(String input, String context, byte[] imageBytes, String mimeType) {
         log.debug("Iniciando análise via Gemini. Tamanho do input: {} caracteres | Tamanho do contexto: {} caracteres",
                 input.length(), context.length());
@@ -108,8 +111,17 @@ public class GeminiReviewService implements ReviewService {
         }
     }
 
-    public ReviewResponse fallback(Throwable t) {
-        log.error("Todos os retries esgotados no ReviewService. Causa raiz: {}", t.getMessage(), t);
-        throw new ReviewProviderException("Falhou após retries", t);
+    public ReviewResponse fallback(String input, String context, Throwable t) {
+        return fallback(t);
+    }
+
+    public ReviewResponse fallback(String input, String context, byte[] imageBytes, String mimeType, Throwable t) {
+        return fallback(t);
+    }
+
+    private ReviewResponse fallback(Throwable t) {
+        log.error("Fallback acionado no GeminiReviewService. Retries esgotados ou circuito aberto. Causa raiz: {}",
+                t.getMessage(), t);
+        throw new ReviewProviderException("Falhou apos retries ou circuito aberto", t);
     }
 }
