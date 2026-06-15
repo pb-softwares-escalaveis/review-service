@@ -68,7 +68,7 @@ app:
   kafka-topics:
     reviews:
       report-auction-review-approved: "reviews.report.auction-approved"
-      report-message-review-approved: "reviews.report.message.approved"
+      report-qa-review-approved: "reviews.report.qa.approved"
       auction-review-approved: "reviews.auction.approved"
       auction-review-rejected: "reviews.auction.rejected"
       qa-review-approved: "reviews.qa.approved"

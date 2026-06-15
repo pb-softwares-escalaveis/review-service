@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class KafkaService {
     @Value("${app.kafka-topics.reviews.report-auction-review-approved}")
     String AUCTION_REPORT_APPROVED;
-    @Value("${app.kafka-topics.reviews.report-message-review-approved}")
+    @Value("${app.kafka-topics.reviews.report-qa-review-approved}")
     String MESSAGE_REPORT_APPROVED;
     @Value("${app.kafka-topics.reviews.auction-review-approved}")
     String AUCTION_REVIEW_APPROVED;
