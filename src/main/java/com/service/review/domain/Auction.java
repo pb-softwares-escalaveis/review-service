@@ -53,6 +53,18 @@ public class Auction {
         this.correlationId = correlationId;
     }
 
+    public Auction(UUID userId, Long auctionId, UUID sellerId, String auctionTitle, String auctionDescription, String reportReason, Instant ocurredAt, String auctionThumb, UUID correlationId) {
+        this.userId = userId;
+        this.auctionId = auctionId;
+        this.sellerId = sellerId;
+        this.auctionTitle = auctionTitle;
+        this.auctionDescription = auctionDescription;
+        this.reportReason = reportReason;
+        this.ocurredAt = ocurredAt;
+        this.auctionThumb = auctionThumb;
+        this.correlationId = correlationId;
+    }
+
     public static Auction from(AuctionCreatedPendingReview event) {
         return new Auction(
                 event.auctionId(),
@@ -72,8 +84,6 @@ public class Auction {
                 event.userId(),
                 event.auctionId(),
                 event.sellerId(),
-                event.sellerName(),
-                event.sellerEmail(),
                 event.auctionTitle(),
                 event.auctionDescription(),
                 event.reportReason(),
@@ -82,6 +92,9 @@ public class Auction {
                 event.correlationId()
         );
     }
+
+
+
 
     @Override
     public String toString() {

@@ -14,11 +14,10 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/review-messages")
+@RequestMapping("/review-message")
 @RequiredArgsConstructor
 public class ReviewMessageController {
     private final ReviewMessageRepository reviewMessageRepository;
-    private final ReviewMessageContextRepository reviewMessageContextRepository;
 
     @GetMapping
     public ResponseEntity<List<ReviewMessage>> getAll() {

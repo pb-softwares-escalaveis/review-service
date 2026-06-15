@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/review-message-contexts")
+@RequestMapping("/review-message-context")
 @RequiredArgsConstructor
 public class ReviewMessageContextController {
     private final ReviewMessageContextRepository reviewMessageContextRepository;

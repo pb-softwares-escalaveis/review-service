@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/review-auction-contexts")
+@RequestMapping("/review-auction-contexts")
 @RequiredArgsConstructor
 public class ReviewAuctionContextController {
     private final ReviewAuctionContextRepository reviewAuctionContextRepository;

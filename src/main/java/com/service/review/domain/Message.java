@@ -51,6 +51,17 @@ public class Message {
         this.correlationId = correlationId;
     }
 
+    public Message(UUID userId, Long auctionId, UUID sellerId, Long messageId, String message, String reportReason, Instant ocurredAt, UUID correlationId) {
+        this.userId = userId;
+        this.auctionId = auctionId;
+        this.sellerId = sellerId;
+        this.messageId = messageId;
+        this.message = message;
+        this.reportReason = reportReason;
+        this.ocurredAt = ocurredAt;
+        this.correlationId = correlationId;
+    }
+
     public static Message from(MessageCreatedPendingReview event) {
         return new Message(
                 event.auctionId(),
@@ -70,8 +81,6 @@ public class Message {
                 event.auctionId(),
                 event.sellerId(),
                 event.messageId(),
-                event.sellerName(),
-                event.sellerEmail(),
                 event.message(),
                 event.reportReason(),
                 event.ocurredAt(),

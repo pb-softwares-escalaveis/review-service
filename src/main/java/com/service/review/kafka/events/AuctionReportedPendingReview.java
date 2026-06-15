@@ -7,8 +7,6 @@ public record AuctionReportedPendingReview(
         UUID userId,
         Long auctionId,
         UUID sellerId,
-        String sellerName,
-        String sellerEmail,
         String auctionTitle,
         String auctionDescription,
         String reportReason,

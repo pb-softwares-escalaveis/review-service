@@ -70,8 +70,14 @@ public class ReviewAuctionService {
             }
         }
 
+        String input = buildInput(auction.toString(), auction.getReportReason(), reviewAuctionContext.getType());
+
+        log.debug("Input montado para análise. auctionId={} | type={} | hasReport={}",
+                auction.getAuctionId(), reviewAuctionContext.getType(),
+                auction.getReportReason() != null && !auction.getReportReason().isBlank());
+
         ReviewResponse response = reviewService.analyze(
-                auction.toString(),
+                input,
                 reviewAuctionContext.getContext(),
                 imageBytes,
                 mimeType
@@ -81,6 +87,13 @@ public class ReviewAuctionService {
                 auction.getAuctionId(), response.approved(), response.repprovedReason());
 
         return response;
+    }
+
+    private String buildInput(String payload, String reportReason, ContextType type) {
+        if (type == ContextType.REPORTED && reportReason != null && !reportReason.isBlank()) {
+            return payload + "\n\nreport: " + reportReason;
+        }
+        return payload;
     }
 
     private void persistReview(Auction auction, ReviewResponse reviewResponse, ReviewAuctionContext reviewAuctionContext) {

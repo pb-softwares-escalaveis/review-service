@@ -8,8 +8,6 @@ public record MessageReportedPendingReview(
         Long auctionId,
         UUID sellerId,
         Long messageId,
-        String sellerName,
-        String sellerEmail,
         String message,
         String reportReason,
         Instant ocurredAt,

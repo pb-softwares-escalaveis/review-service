@@ -57,7 +57,7 @@ public class KafkaReviewConsumer {
         }
     }
 
-    @KafkaListener(topics = "qa.created-pending")
+    @KafkaListener(topics = "qa.review.created-pending")
     public void consumeMessagePendingReview(MessageCreatedPendingReview event) {
         log.info("Evento recebido do Kafka [qa.created-pending]. auctionId={} | messageId={} | sellerId={}",
                 event.auctionId(), event.messageId(), event.sellerId());
@@ -89,7 +89,7 @@ public class KafkaReviewConsumer {
         }
     }
 
-    @KafkaListener(topics = "report.auction-reported")
+    @KafkaListener(topics = "reports.auction.pending-review")
     public void consumeAuctionPendingReportReview(AuctionReportedPendingReview event) {
         log.info("Evento recebido do Kafka [report.auction-reported]. auctionId={} | sellerId={} | userId={}",
                 event.auctionId(), event.sellerId(), event.userId());
@@ -118,7 +118,7 @@ public class KafkaReviewConsumer {
         }
     }
 
-    @KafkaListener(topics = "report.message-reported")
+    @KafkaListener(topics = "reports.qa.pending-review")
     public void consumeMessagePendingReportReview(MessageReportedPendingReview event) {
         log.info("Evento recebido do Kafka [report.message-reported]. auctionId={} | messageId={} | sellerId={} | userId={}",
                 event.auctionId(), event.messageId(), event.sellerId(), event.userId());

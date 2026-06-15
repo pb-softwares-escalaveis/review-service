@@ -1,7 +1,7 @@
 services:
   kafka:
     image: apache/kafka:4.1.2
-    container_name: kafa
+    container_name: kafa-review
     ports:
       - "9092:9092"
     environment:

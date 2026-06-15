@@ -55,13 +55,13 @@ public class GeminiReviewService implements ReviewService {
     }
 
     @Retry(name = "geminiReviewService")
-    @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback")
+    @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback_message")
     public ReviewResponse analyze(String input, String context) {
         return analyze(input, context, null, null);
     }
 
     @Retry(name = "geminiReviewService")
-    @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback")
+    @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback_auction")
     public ReviewResponse analyze(String input, String context, byte[] imageBytes, String mimeType) {
         log.debug("Iniciando análise via Gemini. Tamanho do input: {} caracteres | Tamanho do contexto: {} caracteres",
                 input.length(), context.length());
@@ -111,11 +111,11 @@ public class GeminiReviewService implements ReviewService {
         }
     }
 
-    public ReviewResponse fallback(String input, String context, Throwable t) {
+    public ReviewResponse fallback_message(String input, String context, Throwable t) {
         return fallback(t);
     }
 
-    public ReviewResponse fallback(String input, String context, byte[] imageBytes, String mimeType, Throwable t) {
+    public ReviewResponse fallback_auction(String input, String context, byte[] imageBytes, String mimeType, Throwable t) {
         return fallback(t);
     }
 

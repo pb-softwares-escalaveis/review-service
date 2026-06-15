@@ -16,11 +16,10 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/review-auctions")
+@RequestMapping("/review-auction")
 @RequiredArgsConstructor
 public class ReviewAuctionController {
     private final ReviewAuctionRepository reviewAuctionRepository;
-    private final ReviewAuctionContextRepository reviewAuctionContextRepository;
 
     @GetMapping
     public ResponseEntity<List<ReviewAuction>> getAll() {

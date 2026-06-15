@@ -62,6 +62,9 @@ public class ReviewAuction {
         this.repprovedReason = repprovedReason;
         this.reportReason = reportReason;
         this.type = type;
+        this.reviewAuctionContext = reviewAuctionContext;
         this.creationDate = Instant.now();
     }
+
+    
 }

@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   application:
@@ -66,9 +66,9 @@ resilience4j:
 
 app:
   kafka-topics:
-    review:
-      report-auction-review-approved: "reviews.report.auction.approved"
-      report-message-review-approved: "reviews.report.auction.approved"
+    reviews:
+      report-auction-review-approved: "reviews.report.auction-approved"
+      report-message-review-approved: "reviews.report.message.approved"
       auction-review-approved: "reviews.auction.approved"
       auction-review-rejected: "reviews.auction.rejected"
       qa-review-approved: "reviews.qa.approved"
