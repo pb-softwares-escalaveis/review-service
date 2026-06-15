@@ -67,9 +67,9 @@ resilience4j:
 app:
   kafka-topics:
     reviews:
-      report-auction-review-approved: "reviews.report.auction-approved"
-      report-qa-review-approved: "reviews.report.qa.approved"
-      auction-review-approved: "reviews.auction.approved"
-      auction-review-rejected: "reviews.auction.rejected"
-      qa-review-approved: "reviews.qa.approved"
-      qa-review-rejected: "reviews.qa.rejected"
+      reviews.report.auction-approved: "reviews.report.auction-approved"
+      reviews.report.qa-approved: "reviews.report.qa-approved"
+      reviews.auction.approved: "reviews.auction.approved"
+      reviews.auction.rejected: "reviews.auction.rejected"
+      reviews.qa.approved: "reviews.qa.approved"
+      reviews.qa.rejected: "reviews.qa.rejected"
