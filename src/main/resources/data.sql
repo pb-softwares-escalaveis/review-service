@@ -15,7 +15,7 @@ VALUES (
 
            Retorne apenas JSON com:
            approved (boolean)
-           reason (string) *apenas se APPROVED = FALSE*'
+           repprovedReason (string) *apenas se APPROVED = FALSE*'
        , 'CREATED');
 
 INSERT INTO review_message_context (context, type)
@@ -36,7 +36,7 @@ VALUES (
 
            Retorne apenas JSON com:
            approved (boolean)
-           reason (string) *apenas se APPROVED = FALSE*',
+           repprovedReason (string) *apenas se APPROVED = FALSE*',
         'CREATED'
        );
 
@@ -60,7 +60,7 @@ VALUES (
 
            Retorne apenas JSON com:
            approved (boolean)
-           reason (string) *apenas se APPROVED = FALSE*',
+           repprovedReason (string) *apenas se APPROVED = FALSE*',
            'REPORTED'
        );
 
@@ -85,6 +85,6 @@ VALUES (
 
            Retorne apenas JSON com:
            approved (boolean)
-           reason (string) *apenas se APPROVED = FALSE*',
+           repprovedReason (string) *apenas se APPROVED = FALSE*',
            'REPORTED'
        );
