@@ -11,17 +11,17 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
-    @Value("${app.kafka-topics.reviews.report-auction-review-approved}")
+    @Value("${app.kafka-topics.reviews.report.auction-approved}")
     String AUCTION_REPORT_APPROVED;
-    @Value("${app.kafka-topics.reviews.report-qa-review-approved}")
+    @Value("${app.kafka-topics.reviews.report.qa-approved}")
     String MESSAGE_REPORT_APPROVED;
-    @Value("${app.kafka-topics.reviews.auction-review-approved}")
+    @Value("${app.kafka-topics.reviews.auction.approved}")
     String AUCTION_REVIEW_APPROVED;
-    @Value("${app.kafka-topics.reviews.auction-review-rejected}")
+    @Value("${app.kafka-topics.reviews.auction.rejected}")
     String AUCTION_REVIEW_REJECTED;
-    @Value("${app.kafka-topics.reviews.qa-review-approved}")
+    @Value("${app.kafka-topics.reviews.qa.approved}")
     String QA_REVIEW_APPROVED;
-    @Value("${app.kafka-topics.reviews.qa-review-rejected}")
+    @Value("${app.kafka-topics.reviews.qa.rejected}")
     String QA_REVIEW_REJECTED;
 
     private final KafkaTemplate<String, ReviewEvent> kafkaTemplate;
