@@ -70,7 +70,7 @@ public class Message {
                 event.sellerName(),
                 event.sellerEmail(),
                 event.message(),
-                event.ocurredAt(),
+                event.occurredAt(),
                 event.correlationId()
         );
     }
@@ -83,7 +83,7 @@ public class Message {
                 event.messageId(),
                 event.message(),
                 event.reportReason(),
-                event.ocurredAt(),
+                event.occurredAt(),
                 event.correlationId()
         );
     }
