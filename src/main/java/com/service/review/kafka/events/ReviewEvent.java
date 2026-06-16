@@ -6,6 +6,6 @@ import java.util.UUID;
 public interface ReviewEvent {
     Long auctionId();
     UUID sellerId();
-    Instant ocurredAt();
+    Instant occurredAt();
     UUID correlationId();
 }

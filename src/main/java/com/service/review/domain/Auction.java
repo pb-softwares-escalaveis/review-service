@@ -23,23 +23,23 @@ public class Auction {
     private String auctionTitle;
     private String auctionDescription;
     private String reportReason;
-    private Instant ocurredAt;
+    private Instant occurredAt;
     private String auctionThumb;
     private UUID correlationId;
 
-    public Auction(Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, Instant ocurredAt, String auctionThumb, UUID correlationId) {
+    public Auction(Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, Instant occurredAt, String auctionThumb, UUID correlationId) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.sellerName = sellerName;
         this.sellerEmail = sellerEmail;
         this.auctionTitle = auctionTitle;
         this.auctionDescription = auctionDescription;
-        this.ocurredAt = ocurredAt;
+        this.occurredAt = occurredAt;
         this.auctionThumb = auctionThumb;
         this.correlationId = correlationId;
     }
 
-    public Auction(UUID userId, Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, String reportReason, Instant ocurredAt, String auctionThumb, UUID correlationId) {
+    public Auction(UUID userId, Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, String reportReason, Instant occurredAt, String auctionThumb, UUID correlationId) {
         this.userId = userId;
         this.auctionId = auctionId;
         this.sellerId = sellerId;
@@ -48,19 +48,19 @@ public class Auction {
         this.auctionTitle = auctionTitle;
         this.auctionDescription = auctionDescription;
         this.reportReason = reportReason;
-        this.ocurredAt = ocurredAt;
+        this.occurredAt = occurredAt;
         this.auctionThumb = auctionThumb;
         this.correlationId = correlationId;
     }
 
-    public Auction(UUID userId, Long auctionId, UUID sellerId, String auctionTitle, String auctionDescription, String reportReason, Instant ocurredAt, String auctionThumb, UUID correlationId) {
+    public Auction(UUID userId, Long auctionId, UUID sellerId, String auctionTitle, String auctionDescription, String reportReason, Instant occurredAt, String auctionThumb, UUID correlationId) {
         this.userId = userId;
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.auctionTitle = auctionTitle;
         this.auctionDescription = auctionDescription;
         this.reportReason = reportReason;
-        this.ocurredAt = ocurredAt;
+        this.occurredAt = occurredAt;
         this.auctionThumb = auctionThumb;
         this.correlationId = correlationId;
     }
@@ -73,7 +73,7 @@ public class Auction {
                 event.sellerEmail(),
                 event.auctionTitle(),
                 event.auctionDescription(),
-                event.ocurredAt(),
+                event.occurredAt(),
                 event.auctionThumb(),
                 event.correlationId()
         );
@@ -87,7 +87,7 @@ public class Auction {
                 event.auctionTitle(),
                 event.auctionDescription(),
                 event.reportReason(),
-                event.ocurredAt(),
+                event.occurredAt(),
                 event.auctionThumb(),
                 event.correlationId()
         );

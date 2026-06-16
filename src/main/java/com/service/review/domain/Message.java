@@ -24,21 +24,21 @@ public class Message {
     private String sellerEmail;
     private String message;
     private String reportReason;
-    private Instant ocurredAt;
+    private Instant occurredAt;
     private UUID correlationId;
 
-    public Message(Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, Instant ocurredAt, UUID correlationId) {
+    public Message(Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, Instant occurredAt, UUID correlationId) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.messageId = messageId;
         this.sellerName = sellerName;
         this.sellerEmail = sellerEmail;
         this.message = message;
-        this.ocurredAt = ocurredAt;
+        this.occurredAt = occurredAt;
         this.correlationId = correlationId;
     }
 
-    public Message(UUID userId, Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, String reportReason, Instant ocurredAt, UUID correlationId) {
+    public Message(UUID userId, Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, String reportReason, Instant occurredAt, UUID correlationId) {
         this.userId = userId;
         this.auctionId = auctionId;
         this.sellerId = sellerId;
@@ -47,18 +47,18 @@ public class Message {
         this.sellerEmail = sellerEmail;
         this.message = message;
         this.reportReason = reportReason;
-        this.ocurredAt = ocurredAt;
+        this.occurredAt = occurredAt;
         this.correlationId = correlationId;
     }
 
-    public Message(UUID userId, Long auctionId, UUID sellerId, Long messageId, String message, String reportReason, Instant ocurredAt, UUID correlationId) {
+    public Message(UUID userId, Long auctionId, UUID sellerId, Long messageId, String message, String reportReason, Instant occurredAt, UUID correlationId) {
         this.userId = userId;
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.messageId = messageId;
         this.message = message;
         this.reportReason = reportReason;
-        this.ocurredAt = ocurredAt;
+        this.occurredAt = occurredAt;
         this.correlationId = correlationId;
     }
 

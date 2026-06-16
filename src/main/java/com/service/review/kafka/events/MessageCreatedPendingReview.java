@@ -10,7 +10,7 @@ public record MessageCreatedPendingReview(
         String sellerName,
         String sellerEmail,
         String message,
-        Instant ocurredAt,
+        Instant occurredAt,
         UUID correlationId
 ) {
 }

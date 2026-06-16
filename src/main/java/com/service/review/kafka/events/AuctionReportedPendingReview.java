@@ -10,7 +10,7 @@ public record AuctionReportedPendingReview(
         String auctionTitle,
         String auctionDescription,
         String reportReason,
-        Instant ocurredAt,
+        Instant occurredAt,
         String auctionThumb,
         UUID correlationId
 ) implements ReviewEvent {
