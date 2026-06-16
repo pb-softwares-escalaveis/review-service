@@ -30,7 +30,7 @@ public class MockReviewService implements ReviewService {
                         && !normalized.contains("drogas");
 
         String reason = approved
-                ? null
+                ? "Aprovado"
                 : "Reprovado pelo mock de desenvolvimento.";
 
         log.info("MockReviewService -> approved={}", approved);

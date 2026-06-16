@@ -6,10 +6,7 @@ import com.service.review.domain.ReviewAuctionContext;
 import com.service.review.dto.ReviewResponse;
 import com.service.review.enums.ContextType;
 import com.service.review.kafka.KafkaService;
-import com.service.review.kafka.events.AuctionReportApproved;
-import com.service.review.kafka.events.AuctionReviewApproved;
-import com.service.review.kafka.events.AuctionReviewRejected;
-import com.service.review.kafka.events.ReviewEvent;
+import com.service.review.kafka.events.*;
 import com.service.review.repository.ReviewAuctionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,13 +27,13 @@ public class ReviewAuctionService {
     private final ReviewService reviewService;
     private final KafkaService kafkaService;
 
-    public ReviewResponse reviewAuction(Auction auction, ReviewAuctionContext reviewAuctionContext) {
+    public ReviewResponse reviewAuction(Auction auction, ReviewAuctionContext reviewAuctionContext, UUID userId) {
         log.info("Iniciando revisão do leilão. auctionId={} | sellerId={}",
                 auction.getAuctionId(), auction.getSellerId());
 
         ReviewResponse reviewResponse = analyzeAuction(auction, reviewAuctionContext);
         persistReview(auction, reviewResponse, reviewAuctionContext);
-        publishEvent(auction, reviewResponse, reviewAuctionContext);
+        publishEvent(auction, reviewResponse, reviewAuctionContext, userId);
 
         log.info("Revisão do leilão concluída. auctionId={} | approved={} | reason='{}'",
                 auction.getAuctionId(), reviewResponse.approved(), reviewResponse.repprovedReason());
@@ -127,7 +124,7 @@ public class ReviewAuctionService {
                 saved.getId(), auction.getAuctionId(), reviewResponse.approved());
     }
 
-    private void publishEvent(Auction auction, ReviewResponse reviewResponse, ReviewAuctionContext reviewAuctionContext) {
+    private void publishEvent(Auction auction, ReviewResponse reviewResponse, ReviewAuctionContext reviewAuctionContext, UUID userId) {
         ReviewEvent reviewEvent;
         boolean isReport = reviewAuctionContext.getType() == ContextType.REPORTED;
 
@@ -138,10 +135,15 @@ public class ReviewAuctionService {
                 reviewEvent = new AuctionReportApproved(
                         auction.getAuctionId(),
                         auction.getSellerId(),
+                        userId,
                         reviewResponse.repprovedReason(),
+                        auction.getAuctionTitle(),
+                        auction.getAuctionThumb(),
+                        auction.getAuctionDescription(),
                         Instant.now(),
                         UUID.randomUUID()
                 );
+                System.out.println(reviewEvent);
             } else {
                 log.info("Leilão APROVADO — publicando evento AuctionReviewApproved. auctionId={} | sellerId={}",
                         auction.getAuctionId(), auction.getSellerId());

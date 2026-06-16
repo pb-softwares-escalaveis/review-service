@@ -6,8 +6,10 @@ import java.util.UUID;
 public record MessageReportApproved(
         Long auctionId,
         UUID sellerId,
+        UUID userId,
         Long messageId,
-        String repprovedReason,
+        String message,
+        String reprovedReason,
         Instant occurredAt,
         UUID correlationId
 ) implements ReviewEvent {

@@ -48,7 +48,7 @@ public class KafkaReviewConsumer {
                 reviewAuctionContext.getId(), auction.getAuctionId());
 
         try {
-            reviewAuctionService.reviewAuction(auction, reviewAuctionContext);
+            reviewAuctionService.reviewAuction(auction, reviewAuctionContext, event.sellerId());
             log.info("Processamento do evento de leilão finalizado com sucesso. auctionId={}", auction.getAuctionId());
         } catch (Exception e) {
             log.error("Erro ao processar revisão do leilão. auctionId={} | erro={}",
@@ -79,7 +79,7 @@ public class KafkaReviewConsumer {
                 reviewMessageContext.getId(), message.getMessageId());
 
         try {
-            reviewMessageService.reviewMessage(message, reviewMessageContext);
+            reviewMessageService.reviewMessage(message, reviewMessageContext, event.userId());
             log.info("Processamento do evento de mensagem finalizado com sucesso. messageId={} | auctionId={}",
                     message.getMessageId(), message.getAuctionId());
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class KafkaReviewConsumer {
                 reviewAuctionContext.getId(), auction.getAuctionId());
 
         try {
-            reviewAuctionService.reviewAuction(auction, reviewAuctionContext);
+            reviewAuctionService.reviewAuction(auction, reviewAuctionContext, event.userId());
             log.info("Processamento do evento de report finalizado com sucesso. auctionId={}", auction.getAuctionId());
         } catch (Exception e) {
             log.error("Erro ao processar revisão do report. auctionId={} | erro={}",
@@ -140,7 +140,7 @@ public class KafkaReviewConsumer {
                 reviewMessageContext.getId(), message.getMessageId());
 
         try {
-            reviewMessageService.reviewMessage(message, reviewMessageContext);
+            reviewMessageService.reviewMessage(message, reviewMessageContext, event.userId());
             log.info("Processamento do evento de report finalizado com sucesso. messageId={} | auctionId={}",
                     message.getMessageId(), message.getAuctionId());
         } catch (Exception e) {
