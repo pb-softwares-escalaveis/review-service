@@ -99,6 +99,7 @@ public class ReviewMessageService {
                         message.getAuctionId(),
                         message.getSellerId(),
                         message.getMessageId(),
+                        reviewResponse.repprovedReason(),
                         Instant.now(),
                         UUID.randomUUID()
                 );

@@ -7,6 +7,7 @@ public record MessageReportApproved(
         Long auctionId,
         UUID sellerId,
         Long messageId,
+        String repprovedReason,
         Instant ocurredAt,
         UUID correlationId
 ) implements ReviewEvent {

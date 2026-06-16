@@ -138,6 +138,7 @@ public class ReviewAuctionService {
                 reviewEvent = new AuctionReportApproved(
                         auction.getAuctionId(),
                         auction.getSellerId(),
+                        reviewResponse.repprovedReason(),
                         Instant.now(),
                         UUID.randomUUID()
                 );
