@@ -136,17 +136,21 @@ public class ReviewAuctionService {
                 log.info("Report de leilão APROVADO — publicando evento AuctionReportApproved. auctionId={} | sellerId={}",
                         auction.getAuctionId(), auction.getSellerId());
                 reviewEvent = new AuctionReportApproved(
+                        auction.getUserId(),
                         auction.getAuctionId(),
                         auction.getSellerId(),
+                        auction.getAuctionTitle(),
+                        auction.getAuctionDescription(),
+                        auction.getReportReason(),
                         reviewResponse.repprovedReason(),
                         Instant.now(),
+                        auction.getAuctionThumb(),
                         UUID.randomUUID()
                 );
             } else {
                 log.info("Leilão APROVADO — publicando evento AuctionReviewApproved. auctionId={} | sellerId={}",
                         auction.getAuctionId(), auction.getSellerId());
                 reviewEvent = new AuctionReviewApproved(
-                        auction.getUserId(),
                         auction.getAuctionId(),
                         auction.getSellerId(),
                         Instant.now(),

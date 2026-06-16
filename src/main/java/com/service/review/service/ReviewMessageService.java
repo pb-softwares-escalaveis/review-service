@@ -96,9 +96,12 @@ public class ReviewMessageService {
                 log.info("Report de mensagem APROVADO — publicando evento MessageReportApproved. messageId={} | auctionId={} | sellerId={}",
                         message.getMessageId(), message.getAuctionId(), message.getSellerId());
                 reviewEvent = new MessageReportApproved(
-                        message.getAuctionId(),
+                        message.getUserId(),
                         message.getSellerId(),
+                        message.getAuctionId(),
                         message.getMessageId(),
+                        message.getMessage(),
+                        message.getReportReason(),
                         reviewResponse.repprovedReason(),
                         Instant.now(),
                         UUID.randomUUID()
