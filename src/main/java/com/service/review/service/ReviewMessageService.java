@@ -107,6 +107,7 @@ public class ReviewMessageService {
                 log.info("Mensagem APROVADA — publicando evento MessageReviewApproved. messageId={} | auctionId={} | sellerId={}",
                         message.getMessageId(), message.getAuctionId(), message.getSellerId());
                 reviewEvent = new MessageReviewApproved(
+                        message.getUserId(),
                         message.getAuctionId(),
                         message.getSellerId(),
                         message.getMessageId(),

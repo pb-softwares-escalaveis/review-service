@@ -146,6 +146,7 @@ public class ReviewAuctionService {
                 log.info("Leilão APROVADO — publicando evento AuctionReviewApproved. auctionId={} | sellerId={}",
                         auction.getAuctionId(), auction.getSellerId());
                 reviewEvent = new AuctionReviewApproved(
+                        auction.getUserId(),
                         auction.getAuctionId(),
                         auction.getSellerId(),
                         Instant.now(),
