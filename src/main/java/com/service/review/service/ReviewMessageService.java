@@ -78,6 +78,8 @@ public class ReviewMessageService {
                     message.getMessageId(),
                     reviewResponse.approved(),
                     reviewResponse.repprovedReason(),
+                    message.getReportReason(),
+                    reviewMessageContext.getType(),
                     reviewMessageContext
             );
         }
