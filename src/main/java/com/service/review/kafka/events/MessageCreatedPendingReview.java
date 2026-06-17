@@ -6,6 +6,7 @@ import java.util.UUID;
 public record MessageCreatedPendingReview(
         Long auctionId,
         UUID sellerId,
+        UUID userId,
         Long messageId,
         String sellerName,
         String sellerEmail,

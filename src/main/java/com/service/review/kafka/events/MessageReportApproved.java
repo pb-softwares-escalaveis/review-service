@@ -4,13 +4,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record MessageReportApproved(
-        UUID userId,
-        UUID sellerId,
         Long auctionId,
+        UUID sellerId,
+        UUID userId,
         Long messageId,
         String message,
-        String reportReason,
-        String repprovedReason,
+        String reprovedReason,
         Instant occurredAt,
         UUID correlationId
 ) implements ReviewEvent {

@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record MessageReviewApproved(
-        UUID userId,
         Long auctionId,
         UUID sellerId,
         Long messageId,

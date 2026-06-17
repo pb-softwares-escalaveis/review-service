@@ -23,13 +23,13 @@ public class ReviewMessageService {
     private final ReviewService reviewService;
     private final KafkaService kafkaService;
 
-    public ReviewResponse reviewMessage(Message message, ReviewMessageContext reviewMessageContext) {
+    public ReviewResponse reviewMessage(Message message, ReviewMessageContext reviewMessageContext, UUID userId) {
         log.info("Iniciando revisão da mensagem. auctionId={} | messageId={} | sellerId={}",
                 message.getAuctionId(), message.getMessageId(), message.getSellerId());
 
         ReviewResponse reviewResponse = analyzeMessage(message, reviewMessageContext);
         persistReview(message, reviewMessageContext, reviewResponse);
-        publishEvent(message, reviewResponse, reviewMessageContext);
+        publishEvent(message, reviewResponse, reviewMessageContext, userId);
 
         log.info("Revisão da mensagem concluída. auctionId={} | messageId={} | approved={} | reason='{}'",
                 message.getAuctionId(), message.getMessageId(),
@@ -78,6 +78,8 @@ public class ReviewMessageService {
                     message.getMessageId(),
                     reviewResponse.approved(),
                     reviewResponse.repprovedReason(),
+                    message.getReportReason(),
+                    reviewMessageContext.getType(),
                     reviewMessageContext
             );
         }
@@ -87,7 +89,7 @@ public class ReviewMessageService {
                 saved.getId(), message.getMessageId(), message.getAuctionId(), reviewResponse.approved());
     }
 
-    private void publishEvent(Message message, ReviewResponse reviewResponse, ReviewMessageContext reviewMessageContext) {
+    private void publishEvent(Message message, ReviewResponse reviewResponse, ReviewMessageContext reviewMessageContext, UUID userId) {
         ReviewEvent reviewEvent;
         boolean isReport = reviewMessageContext.getType() == ContextType.REPORTED;
 
@@ -96,21 +98,20 @@ public class ReviewMessageService {
                 log.info("Report de mensagem APROVADO — publicando evento MessageReportApproved. messageId={} | auctionId={} | sellerId={}",
                         message.getMessageId(), message.getAuctionId(), message.getSellerId());
                 reviewEvent = new MessageReportApproved(
-                        message.getUserId(),
-                        message.getSellerId(),
                         message.getAuctionId(),
+                        message.getSellerId(),
+                        userId,
                         message.getMessageId(),
                         message.getMessage(),
-                        message.getReportReason(),
                         reviewResponse.repprovedReason(),
                         Instant.now(),
                         UUID.randomUUID()
                 );
+                System.out.println("TESTE::: " + reviewEvent);
             } else {
                 log.info("Mensagem APROVADA — publicando evento MessageReviewApproved. messageId={} | auctionId={} | sellerId={}",
                         message.getMessageId(), message.getAuctionId(), message.getSellerId());
                 reviewEvent = new MessageReviewApproved(
-                        message.getUserId(),
                         message.getAuctionId(),
                         message.getSellerId(),
                         message.getMessageId(),

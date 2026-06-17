@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8084
 
 spring:
   application:
@@ -8,7 +8,7 @@ spring:
     active: dev
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/review
+    url: jdbc:postgresql://localhost:5439/review
     username: review
     password: review
     driver-class-name: org.postgresql.Driver

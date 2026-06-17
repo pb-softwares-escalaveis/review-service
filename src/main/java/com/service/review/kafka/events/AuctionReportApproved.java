@@ -4,15 +4,14 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record AuctionReportApproved(
-        UUID userId,
         Long auctionId,
         UUID sellerId,
-        String auctionTitle,
-        String auctionDescription,
+        UUID userId,
         String reportReason,
-        String repprovedReason,
-        Instant occurredAt,
+        String auctionTitle,
         String auctionThumb,
+        String auctionDescription,
+        Instant occurredAt,
         UUID correlationId
 ) implements ReviewEvent {
 }
