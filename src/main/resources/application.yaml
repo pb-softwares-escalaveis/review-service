@@ -5,7 +5,7 @@ spring:
   application:
     name: review
   profiles:
-    active: dev
+    active: prod
 
   datasource:
     url: jdbc:postgresql://localhost:5439/review
