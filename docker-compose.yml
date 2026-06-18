@@ -1,36 +1,44 @@
 services:
-  app:
-    build: .
-    image: review-service:latest
+  review-service:
     container_name: review-service
+    image: gabrielmeruzzi/review-service:latest
+    restart: always
     ports:
-      - "8084:8084"
+      - "${REVIEW_SERVICE_PORT:-8084}:${REVIEW_SERVICE_PORT:-8084}"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/review
-      SPRING_DATASOURCE_USERNAME: review
-      SPRING_DATASOURCE_PASSWORD: review
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: host.docker.internal:9092
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      SPRING_PROFILES_ACTIVE: prod
+      REVIEW_SERVICE_PORT: ${REVIEW_SERVICE_PORT:-8084}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      REVIEW_SERVICE_DB_USER: ${REVIEW_SERVICE_DB_USER}
+      REVIEW_SERVICE_DB_PASSWORD: ${REVIEW_SERVICE_DB_PASSWORD}
+      KAFKA_SERVERS: ${KAFKA_SERVERS}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    networks:
+      - leilao-network
     depends_on:
-      postgres:
+      review-postgres:
         condition: service_healthy
 
-  postgres:
+  review-postgres:
     image: postgres:15-alpine
     container_name: review-postgres
     ports:
-      - "5439:5432"
+      - "${REVIEW_SERVICE_DB_PORT:-5439}:5432"
     environment:
       POSTGRES_DB: review
-      POSTGRES_USER: review
-      POSTGRES_PASSWORD: review
+      POSTGRES_USER: ${REVIEW_SERVICE_DB_USER}
+      POSTGRES_PASSWORD: ${REVIEW_SERVICE_DB_PASSWORD}
     volumes:
       - review-postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U review -d review"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+networks:
+  leilao-network:
+    external: true
 
 volumes:
   review-postgres-data:
