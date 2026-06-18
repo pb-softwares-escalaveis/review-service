@@ -6,6 +6,7 @@ import com.google.genai.types.*;
 import com.service.review.dto.ReviewResponse;
 import com.service.review.exception.ReviewProviderException;
 import io.github.cdimascio.dotenv.Dotenv;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Profile("prod")
@@ -21,9 +23,11 @@ import java.util.List;
 public class GeminiReviewService implements ReviewService {
     private static final String MODEL = "gemini-2.5-flash";
     private final Client client;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public GeminiReviewService() {
+    public GeminiReviewService(ObjectMapper objectMapper) {
+        this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+
         log.info("Inicializando ReviewService — carregando GEMINI_API_KEY...");
 
         String apiKey = System.getenv("GEMINI_API_KEY");
@@ -63,6 +67,8 @@ public class GeminiReviewService implements ReviewService {
     @Retry(name = "geminiReviewService")
     @CircuitBreaker(name = "geminiReviewService", fallbackMethod = "fallback_auction")
     public ReviewResponse analyze(String input, String context, byte[] imageBytes, String mimeType) {
+        validateRequest(input, context);
+
         log.debug("Iniciando análise via Gemini. Tamanho do input: {} caracteres | Tamanho do contexto: {} caracteres",
                 input.length(), context.length());
 
@@ -95,20 +101,59 @@ public class GeminiReviewService implements ReviewService {
 
         log.debug("Enviando requisição ao modelo Gemini '{}'...", MODEL);
 
-        GenerateContentResponse response = client.models.generateContent(MODEL, List.of(content), config);
+        GenerateContentResponse response = generateContent(content, config);
+        String responseText = extractResponseText(response);
 
-        log.debug("Resposta recebida do Gemini. Tamanho da resposta: {} caracteres", response.text().length());
+        log.debug("Resposta recebida do Gemini. Tamanho da resposta: {} caracteres", responseText.length());
 
         try {
-            ReviewResponse reviewResponse = objectMapper.readValue(response.text(), ReviewResponse.class);
+            ReviewResponse reviewResponse = objectMapper.readValue(responseText, ReviewResponse.class);
             log.info("Análise concluída. Resultado: approved={} | reason='{}'",
                     reviewResponse.approved(), reviewResponse.repprovedReason());
             return reviewResponse;
         } catch (Exception e) {
             log.error("Falha ao desserializar resposta do Gemini. Resposta recebida: '{}'. Erro: {}",
-                    response.text(), e.getMessage(), e);
+                    responseText, e.getMessage(), e);
             throw new ReviewProviderException("Erro ao converter resposta da IA", e);
         }
+    }
+
+    private void validateRequest(String input, String context) {
+        if (input == null || input.isBlank()) {
+            throw new IllegalArgumentException("Input para analise nao pode ser vazio");
+        }
+
+        if (context == null || context.isBlank()) {
+            throw new IllegalArgumentException("Contexto para analise nao pode ser vazio");
+        }
+    }
+
+    private GenerateContentResponse generateContent(Content content, GenerateContentConfig config) {
+        try {
+            return client.models.generateContent(MODEL, List.of(content), config);
+        } catch (Exception e) {
+            log.error("Falha na chamada ao Gemini. model={} | erro={}", MODEL, e.getMessage(), e);
+            throw new ReviewProviderException("Erro ao chamar Gemini", e);
+        }
+    }
+
+    private String extractResponseText(GenerateContentResponse response) {
+        if (response == null) {
+            throw new ReviewProviderException("Resposta nula do Gemini");
+        }
+
+        String responseText;
+        try {
+            responseText = response.text();
+        } catch (Exception e) {
+            throw new ReviewProviderException("Erro ao ler resposta do Gemini", e);
+        }
+
+        if (responseText == null || responseText.isBlank()) {
+            throw new ReviewProviderException("Resposta vazia do Gemini");
+        }
+
+        return responseText;
     }
 
     public ReviewResponse fallback_message(String input, String context, Throwable t) {
@@ -120,8 +165,14 @@ public class GeminiReviewService implements ReviewService {
     }
 
     private ReviewResponse fallback(Throwable t) {
-        log.error("Fallback acionado no GeminiReviewService. Retries esgotados ou circuito aberto. Causa raiz: {}",
-                t.getMessage(), t);
+        if (t instanceof CallNotPermittedException) {
+            log.error("Circuit breaker aberto no GeminiReviewService. Chamada bloqueada antes de acionar o Gemini. Erro: {}",
+                    t.getMessage(), t);
+        } else {
+            log.error("Fallback acionado no GeminiReviewService. Retries esgotados ou chamada ao Gemini falhou. Causa raiz: {}",
+                    t.getMessage(), t);
+        }
+
         throw new ReviewProviderException("Falhou apos retries ou circuito aberto", t);
     }
 }
