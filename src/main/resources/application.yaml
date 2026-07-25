@@ -28,6 +28,18 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: review-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.add.type.headers: false
+        spring.json.use.type.headers: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 eureka:
   client:
@@ -88,7 +100,9 @@ app:
     reviews:
       report:
         auction-approved: reviews.report.auction-approved
+        auction-rejected: reviews.report.auction-rejected
         qa-approved: reviews.report.qa-approved
+        qa-rejected: reviews.report.qa-rejected
       auction:
         approved: reviews.auction.approved
         rejected: reviews.auction.rejected
