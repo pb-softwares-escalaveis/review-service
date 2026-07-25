@@ -40,7 +40,7 @@ public class ReviewMessageService {
             reviewMetrics.recordProcessingTime("message", contextType, "success", System.currentTimeMillis() - start);
             log.info("Revisão da mensagem concluída. auctionId={} | messageId={} | approved={} | reason='{}'",
                     message.getAuctionId(), message.getMessageId(),
-                    reviewResponse.approved(), reviewResponse.repprovedReason());
+                    reviewResponse.approved(), reviewResponse.reprovedReason());
 
             return reviewResponse;
         } catch (Exception e) {
@@ -53,7 +53,8 @@ public class ReviewMessageService {
         log.debug("Enviando mensagem para análise de IA. messageId={} | auctionId={} | contextId={}",
                 message.getMessageId(), message.getAuctionId(), reviewMessageContext.getId());
 
-        ReviewResponse response = reviewService.analyze(message.toString(), reviewMessageContext.getContext());
+        String input = buildInput(message, contextType);
+        ReviewResponse response = reviewService.analyze(input, reviewMessageContext.getContext());
 
         if (response.approved()) {
             reviewMetrics.incrementApproved("message", contextType);
@@ -62,7 +63,7 @@ public class ReviewMessageService {
         }
 
         log.debug("Análise de IA recebida para mensagem. messageId={} | approved={} | reason='{}'",
-                message.getMessageId(), response.approved(), response.repprovedReason());
+                message.getMessageId(), response.approved(), response.reprovedReason());
 
         return response;
     }
@@ -74,7 +75,7 @@ public class ReviewMessageService {
 
         ReviewMessage reviewMessage = new ReviewMessage(
                 message.getAuctionId(), message.getSellerId(), message.getMessageId(),
-                reviewResponse.approved(), reviewResponse.repprovedReason(),
+                reviewResponse.approved(), reviewResponse.reprovedReason(),
                 message.getReportReason(), contextType, reviewMessageContext
         );
 
@@ -90,6 +91,17 @@ public class ReviewMessageService {
         }
     }
 
+    private String buildInput(Message message, ContextType type) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Mensagem: ").append(message.getMessage());
+
+        if (type == ContextType.REPORTED && message.getReportReason() != null && !message.getReportReason().isBlank()) {
+            sb.append("\n\nDenúncia: ").append(message.getReportReason());
+        }
+
+        return sb.toString();
+    }
+
     private void publishEvent(Message message, ReviewResponse reviewResponse,
                               ReviewMessageContext reviewMessageContext, UUID userId, ContextType contextType) {
         boolean isReport = contextType == ContextType.REPORTED;
@@ -97,26 +109,68 @@ public class ReviewMessageService {
         String eventType;
 
         if (reviewResponse.approved()) {
+            //CASO: Conteúdo APROVADO
             if (isReport) {
-                eventType = "report_approved";
-                log.info("Report de mensagem APROVADO — publicando evento MessageReportApproved. messageId={} | auctionId={} | sellerId={}",
-                        message.getMessageId(), message.getAuctionId(), message.getSellerId());
-                reviewEvent = new MessageReportApproved(message.getAuctionId(), message.getSellerId(), userId,
-                        message.getMessageId(), message.getMessage(), reviewResponse.repprovedReason(),
-                        Instant.now(), UUID.randomUUID());
+                //Conteúdo limpo + foi denúncia = Denúncia REJEITADA
+                eventType = "report_rejected";
+                log.info("Denúncia de mensagem REJEITADA (conteúdo aprovado). messageId={} | auctionId={} | reporterId={}",
+                        message.getMessageId(), message.getAuctionId(), userId);
+                reviewEvent = new MessageReportRejected(
+                        message.getAuctionId(),
+                        message.getSellerId(),
+                        userId,
+                        message.getMessageId(),
+                        message.getMessage(),
+                        "Conteúdo da mensagem está dentro das regras",
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
             } else {
+                // Criação normal aprovada
                 eventType = "approved";
-                log.info("Mensagem APROVADA — publicando evento MessageReviewApproved. messageId={} | auctionId={} | sellerId={}",
+                log.info("Mensagem APROVADA. messageId={} | auctionId={} | sellerId={}",
                         message.getMessageId(), message.getAuctionId(), message.getSellerId());
-                reviewEvent = new MessageReviewApproved(message.getAuctionId(), message.getSellerId(),
-                        message.getMessageId(), Instant.now(), UUID.randomUUID());
+                reviewEvent = new MessageReviewApproved(
+                        message.getAuctionId(),
+                        message.getSellerId(),
+                        message.getMessageId(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
             }
         } else {
-            eventType = "rejected";
-            log.info("Mensagem REPROVADA — publicando evento MessageReviewRejected. messageId={} | auctionId={} | sellerId={} | reason='{}'",
-                    message.getMessageId(), message.getAuctionId(), message.getSellerId(), reviewResponse.repprovedReason());
-            reviewEvent = new MessageReviewRejected(message.getAuctionId(), message.getSellerId(),
-                    message.getMessageId(), reviewResponse.repprovedReason(), Instant.now(), UUID.randomUUID());
+            // CASO: Conteúdo REPROVADO (viola regras)
+            String reason = reviewResponse.reprovedReason();
+
+            if (isReport) {
+                // Conteúdo viola regras + foi denúncia = Denúncia APROVADA
+                eventType = "report_approved";
+                log.info("Denúncia de mensagem APROVADA (conteúdo viola regras). messageId={} | auctionId={} | reporterId={} | reason='{}'",
+                        message.getMessageId(), message.getAuctionId(), userId, reason);
+                reviewEvent = new MessageReportApproved(
+                        message.getAuctionId(),
+                        message.getSellerId(),
+                        userId,
+                        message.getMessageId(),
+                        message.getMessage(),
+                        reason,
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            } else {
+                //Criação normal reprovada
+                eventType = "rejected";
+                log.info("Mensagem REPROVADA. messageId={} | auctionId={} | sellerId={} | reason='{}'",
+                        message.getMessageId(), message.getAuctionId(), message.getSellerId(), reason);
+                reviewEvent = new MessageReviewRejected(
+                        message.getAuctionId(),
+                        message.getSellerId(),
+                        message.getMessageId(),
+                        reason,
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            }
         }
 
         try {

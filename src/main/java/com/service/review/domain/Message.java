@@ -1,10 +1,8 @@
 package com.service.review.domain;
 
-import com.service.review.kafka.events.AuctionCreatedPendingReview;
 import com.service.review.kafka.events.MessageCreatedPendingReview;
 import com.service.review.kafka.events.MessageReportedPendingReview;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,19 +32,6 @@ public class Message {
         this.sellerName = sellerName;
         this.sellerEmail = sellerEmail;
         this.message = message;
-        this.occurredAt = occurredAt;
-        this.correlationId = correlationId;
-    }
-
-    public Message(UUID userId, Long auctionId, UUID sellerId, Long messageId, String sellerName, String sellerEmail, String message, String reportReason, Instant occurredAt, UUID correlationId) {
-        this.userId = userId;
-        this.auctionId = auctionId;
-        this.sellerId = sellerId;
-        this.messageId = messageId;
-        this.sellerName = sellerName;
-        this.sellerEmail = sellerEmail;
-        this.message = message;
-        this.reportReason = reportReason;
         this.occurredAt = occurredAt;
         this.correlationId = correlationId;
     }
@@ -86,17 +71,5 @@ public class Message {
                 event.occurredAt(),
                 event.correlationId()
         );
-    }
-
-    @Override
-    public String toString() {
-        String base = "Message{" +
-                "message='" + message + '\'';
-
-        if (reportReason != null && !reportReason.isBlank()) {
-            base += ", reportReason='" + reportReason + '\'';
-        }
-
-        return base + '}';
     }
 }

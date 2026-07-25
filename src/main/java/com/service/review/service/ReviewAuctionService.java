@@ -43,7 +43,7 @@ public class ReviewAuctionService {
 
             reviewMetrics.recordProcessingTime("auction", contextType, "success", System.currentTimeMillis() - start);
             log.info("Revisão do leilão concluída. auctionId={} | approved={} | reason='{}'",
-                    auction.getAuctionId(), reviewResponse.approved(), reviewResponse.repprovedReason());
+                    auction.getAuctionId(), reviewResponse.approved(), reviewResponse.reprovedReason());
 
             return reviewResponse;
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class ReviewAuctionService {
             }
         }
 
-        String input = buildInput(auction.toString(), auction.getReportReason(), contextType);
+        String input = buildInput(auction, auction.getReportReason(), contextType);
 
         ReviewResponse response = reviewService.analyze(input, reviewAuctionContext.getContext(), imageBytes, mimeType);
 
@@ -86,16 +86,23 @@ public class ReviewAuctionService {
         }
 
         log.debug("Análise de IA recebida para leilão. auctionId={} | approved={} | reason='{}'",
-                auction.getAuctionId(), response.approved(), response.repprovedReason());
+                auction.getAuctionId(), response.approved(), response.reprovedReason());
 
         return response;
     }
 
-    private String buildInput(String payload, String reportReason, ContextType type) {
+    private String buildInput(Auction auction, String reportReason, ContextType type) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Categoria: ").append(auction.getAuctionCategory()).append("\n");
+        sb.append("Título: ").append(auction.getAuctionTitle()).append("\n");
+        sb.append("Descrição: ").append(auction.getAuctionDescription());
+
+        //Se for denúncia, adiciona o report
         if (type == ContextType.REPORTED && reportReason != null && !reportReason.isBlank()) {
-            return payload + "\n\nreport: " + reportReason;
+            sb.append("\n\nDenúncia: ").append(reportReason);
         }
-        return payload;
+
+        return sb.toString();
     }
 
     private void persistReview(Auction auction, ReviewResponse reviewResponse,
@@ -105,9 +112,9 @@ public class ReviewAuctionService {
 
         ReviewAuction reviewAuction = contextType == ContextType.REPORTED
                 ? new ReviewAuction(auction.getAuctionId(), auction.getSellerId(), reviewResponse.approved(),
-                reviewResponse.repprovedReason(), auction.getReportReason(), contextType, reviewAuctionContext)
+                reviewResponse.reprovedReason(), auction.getReportReason(), contextType, reviewAuctionContext)
                 : new ReviewAuction(auction.getAuctionId(), auction.getSellerId(), reviewResponse.approved(),
-                reviewResponse.repprovedReason(), contextType, reviewAuctionContext);
+                reviewResponse.reprovedReason(), contextType, reviewAuctionContext);
 
         try {
             ReviewAuction saved = reviewAuctionRepository.save(reviewAuction);
@@ -128,26 +135,67 @@ public class ReviewAuctionService {
         String eventType;
 
         if (reviewResponse.approved()) {
+            //CASO: Conteúdo APROVADO pela LLM
             if (isReport) {
-                eventType = "report_approved";
-                log.info("Report de leilão APROVADO — publicando evento AuctionReportApproved. auctionId={} | sellerId={}",
-                        auction.getAuctionId(), auction.getSellerId());
-                reviewEvent = new AuctionReportApproved(auction.getAuctionId(), auction.getSellerId(), userId,
-                        reviewResponse.repprovedReason(), auction.getAuctionTitle(), auction.getAuctionThumb(),
-                        auction.getAuctionDescription(), Instant.now(), UUID.randomUUID());
+                //Conteúdo limpo + foi uma denúncia = Denúncia REJEITADA
+                eventType = "report_rejected";
+                log.info("Denúncia de leilão REJEITADA (conteúdo aprovado). auctionId={} | reporterId={}",
+                        auction.getAuctionId(), userId);
+                reviewEvent = new AuctionReportRejected(
+                        auction.getAuctionId(),
+                        auction.getSellerId(),
+                        userId,
+                        "Conteúdo do anúncio está dentro das regras",
+                        auction.getAuctionTitle(),
+                        auction.getAuctionThumb(),
+                        auction.getAuctionDescription(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
             } else {
+                //Criação normal aprovada
                 eventType = "approved";
-                log.info("Leilão APROVADO — publicando evento AuctionReviewApproved. auctionId={} | sellerId={}",
+                log.info("Criação de anúncio APROVADA. auctionId={} | sellerId={}",
                         auction.getAuctionId(), auction.getSellerId());
-                reviewEvent = new AuctionReviewApproved(auction.getAuctionId(), auction.getSellerId(),
-                        Instant.now(), UUID.randomUUID());
+                reviewEvent = new AuctionReviewApproved(
+                        auction.getAuctionId(),
+                        auction.getSellerId(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
             }
         } else {
-            eventType = "rejected";
-            log.info("Leilão REPROVADO — publicando evento AuctionReviewRejected. auctionId={} | sellerId={} | reason='{}'",
-                    auction.getAuctionId(), auction.getSellerId(), reviewResponse.repprovedReason());
-            reviewEvent = new AuctionReviewRejected(auction.getAuctionId(), auction.getSellerId(),
-                    reviewResponse.repprovedReason(), Instant.now(), UUID.randomUUID());
+            //CASO: Conteúdo REPROVADO (viola regras)
+            String reason = reviewResponse.reprovedReason();
+            if (isReport) {
+                // Conteúdo viola regras + foi uma denúncia = Denúncia APROVADA
+                eventType = "report_approved";
+                log.info("Denúncia de anúncio APROVADA (conteúdo viola regras). auctionId={} | reporterId={} | reason='{}'",
+                        auction.getAuctionId(), userId, reason);
+                reviewEvent = new AuctionReportApproved(
+                        auction.getAuctionId(),
+                        auction.getSellerId(),
+                        userId,
+                        reason,
+                        auction.getAuctionTitle(),
+                        auction.getAuctionThumb(),
+                        auction.getAuctionDescription(),
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            } else {
+                //Criação normal reprovada
+                eventType = "rejected";
+                log.info("Anúncio REPROVADO. auctionId={} | sellerId={} | reason='{}'",
+                        auction.getAuctionId(), auction.getSellerId(), reason);
+                reviewEvent = new AuctionReviewRejected(
+                        auction.getAuctionId(),
+                        auction.getSellerId(),
+                        reason,
+                        Instant.now(),
+                        UUID.randomUUID()
+                );
+            }
         }
 
         try {

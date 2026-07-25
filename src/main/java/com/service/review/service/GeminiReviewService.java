@@ -6,7 +6,6 @@ import com.google.genai.types.*;
 import com.service.review.dto.ReviewResponse;
 import com.service.review.exception.ReviewProviderException;
 import io.github.cdimascio.dotenv.Dotenv;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
@@ -109,10 +108,10 @@ public class GeminiReviewService implements ReviewService {
         try {
             ReviewResponse reviewResponse = objectMapper.readValue(responseText, ReviewResponse.class);
             log.info("Análise concluída. Resultado: approved={} | reason='{}'",
-                    reviewResponse.approved(), reviewResponse.repprovedReason());
+                    reviewResponse.approved(), reviewResponse.reprovedReason());
             return reviewResponse;
         } catch (Exception e) {
-            log.error("Falha ao desserializar resposta do Gemini. Resposta recebida: '{}'. Erro: {}",
+            log.error("Falha ao deserializer resposta do Gemini. Resposta recebida: '{}'. Erro: {}",
                     responseText, e.getMessage(), e);
             throw new ReviewProviderException("Erro ao converter resposta da IA", e);
         }
@@ -156,23 +155,23 @@ public class GeminiReviewService implements ReviewService {
         return responseText;
     }
 
+    // Fallback para o metodo sem imagem
     public ReviewResponse fallback_message(String input, String context, Throwable t) {
-        return fallback(t);
+        log.error("Fallback acionado para analyze (sem imagem). input: {} | context: {} | erro: {}",
+                input, context, t.getMessage(), t);
+        return createFallbackResponse();
     }
 
+    // Fallback para o metodo com imagem
     public ReviewResponse fallback_auction(String input, String context, byte[] imageBytes, String mimeType, Throwable t) {
-        return fallback(t);
+        log.error("Fallback acionado para analyze (com imagem). input: {} | context: {} | erro: {}",
+                input, context, t.getMessage(), t);
+        return createFallbackResponse();
     }
 
-    private ReviewResponse fallback(Throwable t) {
-        if (t instanceof CallNotPermittedException) {
-            log.error("Circuit breaker aberto no GeminiReviewService. Chamada bloqueada antes de acionar o Gemini. Erro: {}",
-                    t.getMessage(), t);
-        } else {
-            log.error("Fallback acionado no GeminiReviewService. Retries esgotados ou chamada ao Gemini falhou. Causa raiz: {}",
-                    t.getMessage(), t);
-        }
-
-        throw new ReviewProviderException("Falhou apos retries ou circuito aberto", t);
+    // Metodo auxiliar para criar uma resposta de fallback padronizada
+    private ReviewResponse createFallbackResponse() {
+        String reason = "Falha na análise automática. Por favor, tente realizar a ação novamente.";
+        return new ReviewResponse(false, reason);
     }
 }

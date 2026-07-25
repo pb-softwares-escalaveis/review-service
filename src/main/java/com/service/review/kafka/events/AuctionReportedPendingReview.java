@@ -9,6 +9,7 @@ public record AuctionReportedPendingReview(
         UUID sellerId,
         String auctionTitle,
         String auctionDescription,
+        String auctionCategory,
         String reportReason,
         Instant occurredAt,
         String auctionThumb,

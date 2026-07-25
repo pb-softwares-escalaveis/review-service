@@ -34,9 +34,9 @@ public class ReviewMessage {
     private Boolean approved;
 
     @Column(name = "reason")
-    private String repprovedReason;
+    private String reprovedReason;
 
-    @Column(name = "reportReason")
+    @Column(name = "report_reason")
     private String reportReason;
 
     @Enumerated(EnumType.STRING)
@@ -50,22 +50,12 @@ public class ReviewMessage {
     @JoinColumn(name = "id_context")
     ReviewMessageContext reviewMessageContext;
 
-    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String repprovedReason, ReviewMessageContext reviewMessageContext) {
-        this.auctionId = auctionId;
-        this.sellerId = sellerId;
-        this.messageId = messageId;
-        this.repprovedReason = repprovedReason;
-        this.approved = approved;
-        this.creationDate = Instant.now();
-        this.reviewMessageContext = reviewMessageContext;
-    }
-
-    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String repprovedReason, String reportReason, ContextType type, ReviewMessageContext reviewMessageContext) {
+    public ReviewMessage(Long auctionId, UUID sellerId, Long messageId, Boolean approved, String reprovedReason, String reportReason, ContextType type, ReviewMessageContext reviewMessageContext) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.messageId = messageId;
         this.approved = approved;
-        this.repprovedReason = repprovedReason;
+        this.reprovedReason = reprovedReason;
         this.reportReason = reportReason;
         this.type = type;
         this.creationDate = Instant.now();

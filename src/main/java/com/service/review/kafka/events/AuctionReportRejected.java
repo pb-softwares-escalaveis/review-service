@@ -3,16 +3,16 @@ package com.service.review.kafka.events;
 import java.time.Instant;
 import java.util.UUID;
 
-public record AuctionCreatedPendingReview(
+public record AuctionReportRejected(
         Long auctionId,
         UUID sellerId,
-        String sellerName,
-        String sellerEmail,
+        UUID userId,
+        String reportReason,
         String auctionTitle,
-        String auctionDescription,
-        String auctionCategory,
-        Instant occurredAt,
         String auctionThumb,
+        String auctionDescription,
+        Instant occurredAt,
         UUID correlationId
-) {
+) implements ReviewEvent {
 }
+

@@ -3,7 +3,6 @@ package com.service.review.domain;
 import com.service.review.kafka.events.AuctionCreatedPendingReview;
 import com.service.review.kafka.events.AuctionReportedPendingReview;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,43 +21,32 @@ public class Auction {
     private String sellerEmail;
     private String auctionTitle;
     private String auctionDescription;
+    private String auctionCategory;
     private String reportReason;
     private Instant occurredAt;
     private String auctionThumb;
     private UUID correlationId;
 
-    public Auction(Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, Instant occurredAt, String auctionThumb, UUID correlationId) {
+    public Auction(Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, String auctionCategory, Instant occurredAt, String auctionThumb, UUID correlationId) {
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.sellerName = sellerName;
         this.sellerEmail = sellerEmail;
         this.auctionTitle = auctionTitle;
         this.auctionDescription = auctionDescription;
+        this.auctionCategory = auctionCategory;
         this.occurredAt = occurredAt;
         this.auctionThumb = auctionThumb;
         this.correlationId = correlationId;
     }
 
-    public Auction(UUID userId, Long auctionId, UUID sellerId, String sellerName, String sellerEmail, String auctionTitle, String auctionDescription, String reportReason, Instant occurredAt, String auctionThumb, UUID correlationId) {
-        this.userId = userId;
-        this.auctionId = auctionId;
-        this.sellerId = sellerId;
-        this.sellerName = sellerName;
-        this.sellerEmail = sellerEmail;
-        this.auctionTitle = auctionTitle;
-        this.auctionDescription = auctionDescription;
-        this.reportReason = reportReason;
-        this.occurredAt = occurredAt;
-        this.auctionThumb = auctionThumb;
-        this.correlationId = correlationId;
-    }
-
-    public Auction(UUID userId, Long auctionId, UUID sellerId, String auctionTitle, String auctionDescription, String reportReason, Instant occurredAt, String auctionThumb, UUID correlationId) {
+    public Auction(UUID userId, Long auctionId, UUID sellerId, String auctionTitle, String auctionDescription, String auctionCategory, String reportReason, Instant occurredAt, String auctionThumb, UUID correlationId) {
         this.userId = userId;
         this.auctionId = auctionId;
         this.sellerId = sellerId;
         this.auctionTitle = auctionTitle;
         this.auctionDescription = auctionDescription;
+        this.auctionCategory = auctionCategory;
         this.reportReason = reportReason;
         this.occurredAt = occurredAt;
         this.auctionThumb = auctionThumb;
@@ -73,6 +61,7 @@ public class Auction {
                 event.sellerEmail(),
                 event.auctionTitle(),
                 event.auctionDescription(),
+                event.auctionCategory(),
                 event.occurredAt(),
                 event.auctionThumb(),
                 event.correlationId()
@@ -86,27 +75,11 @@ public class Auction {
                 event.sellerId(),
                 event.auctionTitle(),
                 event.auctionDescription(),
+                event.auctionCategory(),
                 event.reportReason(),
                 event.occurredAt(),
                 event.auctionThumb(),
                 event.correlationId()
         );
-    }
-
-
-
-
-    @Override
-    public String toString() {
-        String base = "Auction{" +
-                "auctionTitle='" + auctionTitle + '\'' +
-                ", auctionDescription='" + auctionDescription + '\'' +
-                ", auctionThumb='" + auctionThumb + '\'';
-
-        if (reportReason != null && !reportReason.isBlank()) {
-            base += ", reportReason='" + reportReason + '\'';
-        }
-
-        return base + '}';
     }
 }

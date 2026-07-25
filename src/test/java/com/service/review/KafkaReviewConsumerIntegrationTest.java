@@ -23,6 +23,7 @@ class KafkaReviewConsumerIntegrationTest {
                 "gabriel@gmail.com",
                 "Cadeira de 5 pes",
                 "Cadeira totalmente funcional",
+                "Vestimenta",
                 Instant.now(),
                 "https://bucket.oleiloeiroonline.top/auction-images/dev/reject/4chan_pol.png",
                 UUID.randomUUID()
