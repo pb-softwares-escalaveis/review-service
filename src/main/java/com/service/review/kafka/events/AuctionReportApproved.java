@@ -7,7 +7,7 @@ public record AuctionReportApproved(
         Long auctionId,
         UUID sellerId,
         UUID userId,
-        String reportReason,
+        String removalReason,
         String auctionTitle,
         String auctionThumb,
         String auctionDescription,

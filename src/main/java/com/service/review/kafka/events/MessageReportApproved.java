@@ -9,7 +9,7 @@ public record MessageReportApproved(
         UUID userId,
         Long messageId,
         String message,
-        String reprovedReason,
+        String removalReason,
         Instant occurredAt,
         UUID correlationId
 ) implements ReviewEvent {
