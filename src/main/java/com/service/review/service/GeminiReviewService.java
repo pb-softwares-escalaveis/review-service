@@ -20,7 +20,7 @@ import java.util.Objects;
 @Profile("prod")
 @Service
 public class GeminiReviewService implements ReviewService {
-    private static final String MODEL = "gemini-2.5-flash";
+    private static final String MODEL = "gemini-3.6-flash";
     private final Client client;
     private final ObjectMapper objectMapper;
 

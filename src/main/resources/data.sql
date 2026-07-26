@@ -69,6 +69,7 @@ A user has reported this auction. The report is only a hint. The input text MUST
 
 **Decision Rule (CRITICAL):**
 The final decision MUST be based SOLELY on the auction's content (title, description, and image) AND its category. Do not approve/reprove based on "agreeing" with the reporter's opinion.
+Remember that the auction has already been reviewed once by yourself. The report is just a hint to guide your attention. Do not penalize the auction just because it was reported.
 
 **Rules (REPROVE if ANY apply in the content):**
 - Profanity, insults, hate speech, or offensive language in the text description.
